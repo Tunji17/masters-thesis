@@ -41,5 +41,11 @@ User has some unstructured text data (clinical notes) and wants to query and vis
 
 ## Future Work
 
+- [ ] **Coreference Resolution**: Explore the use of coreference resolution techniques to improve the accuracy of named entity recognition. This could involve using pre-trained models, such as AllenNLP or SpaCy, to identify and resolve coreferences in the text data.
+- [ ] **Entity linking**: Explore the use of entity linking techniques to improve the accuracy of named entity recognition. This could involve using external knowledge bases, such as UMLS or SNOMED CT, to link extracted entities to standardized medical terminologies.
 - [ ] **Support for other Data sources**: Extend the system to support other data sources, such as electronic health records (EHRs), clinical trial data, and other unstructured text sources. This could involve developing new algorithms and techniques for extracting relevant information from these data sources.
 - [ ] **Reinforcement Learning**: Explore the use of reinforcement learning techniques to improve the accuracy and efficiency of graph information extraction. This could involve training models to learn optimal strategies for extracting relevant information from unstructured text.
+
+## Problems Encountered
+
+- [ ] **Coreference Resolution**: Cannot use coreferee from SpaCy because it is not supported in the latest version of SpaCy and i can't install it on ARM. Need to find an alternative solution for coreference resolution.
