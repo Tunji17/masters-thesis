@@ -1,4 +1,4 @@
-# Thesis Topic - Graph Information Extraction from clinical notes (Unstrctured Text) in Healthcare
+# Thesis Topic - Graph Information Extraction from clinical notes (Unstructured Text) in Healthcare
 
 ## Overview
 

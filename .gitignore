@@ -1,0 +1,4 @@
+models/*/
+src/.venv
+src/example.cypher
+src/data/*.txt
