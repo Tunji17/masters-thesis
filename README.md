@@ -29,9 +29,11 @@ User has some unstructured text data (clinical notes) and wants to query and vis
 
 - [ ] **Graph Visualization**: Use a graph visualization library, such as D3.js or Cytoscape.js, to display graphs.
 
-- [ ] **Clinical Bert**: Use [Clinical Bert](https://huggingface.co/medicalai/ClinicalBERT) to extract named entities from the clinical notes. Hoping to post-train the model to generate Cypher scripts from NEs and relationships.
+- [ ] **Ihor/gliner-biomed-bi-large-v1.0**: Use the [Ihor/gliner-biomed-bi-large-v1.0](https://huggingface.co/Ihor/gliner-biomed-bi-large-v1.0) model for named entity recognition (NER). This model is specifically designed for biomedical text and should be able to extract relevant information from clinical notes.
 
-- [ ] **Relationship Extraction**: I need a smart and cheap way to extract relationships between the NEs. This could involve using a reasoning model.(Qwen3 32b??). This model could also be used to generate Cypher scripts for training.
+- [ ] **Entity linking**: Explore the use of entity linking techniques to improve the accuracy of named entity recognition. This could involve using external knowledge bases, such as wikipedia.
+
+- [ ] **Closed Information Extraction Extraction**: I need a smart and cheap way to extract relationships between the NEs. This could involve using a reasoning model.(Qwen3 32b??). This model could also be used to generate Cypher scripts for training.
 
 - [ ] **DataSet**: Use the [AGBonnet/augmented-clinical-notes](https://huggingface.co/datasets/AGBonnet/augmented-clinical-notes) as the dataset for training and testing the system. This dataset contains de-identified clinical notes and other relevant information. It will also require some pre-processing to convert the data into a format suitable for training and testing the system.
 
@@ -42,7 +44,7 @@ User has some unstructured text data (clinical notes) and wants to query and vis
 ## Future Work
 
 - [ ] **Coreference Resolution**: Explore the use of coreference resolution techniques to improve the accuracy of named entity recognition. This could involve using pre-trained models, such as AllenNLP or SpaCy, to identify and resolve coreferences in the text data.
-- [ ] **Entity linking**: Explore the use of entity linking techniques to improve the accuracy of named entity recognition. This could involve using external knowledge bases, such as UMLS or SNOMED CT, to link extracted entities to standardized medical terminologies.
+
 - [ ] **Support for other Data sources**: Extend the system to support other data sources, such as electronic health records (EHRs), clinical trial data, and other unstructured text sources. This could involve developing new algorithms and techniques for extracting relevant information from these data sources.
 - [ ] **Reinforcement Learning**: Explore the use of reinforcement learning techniques to improve the accuracy and efficiency of graph information extraction. This could involve training models to learn optimal strategies for extracting relevant information from unstructured text.
 
