@@ -1,3 +1,5 @@
 models/*/
 src/.venv
 src/data/*.txt
+paper/**/*.aux
+paper/main*
