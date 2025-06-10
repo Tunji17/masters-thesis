@@ -8,5 +8,8 @@ MATCH ()-[r]->() RETURN DISTINCT type(r), count(*);
 
 MATCH (e:Entity) RETURN e.name ORDER BY e.name;
 
+// ─────────────────────────── Delete ───────────────────────────
+MATCH (n) DETACH DELETE n;
+
 // ─────────────────────────── Visualise ───────────────────────────
-MATCH p = (n:Entity)-[r:treated_with|associated_with]->(m:Entity) RETURN p;
+MATCH p = (n:Entity)-[r]->(m:Entity) RETURN p;

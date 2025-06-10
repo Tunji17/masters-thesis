@@ -27,6 +27,13 @@ User has some unstructured text data (clinical notes) and wants to query and vis
 
 - [ ] **Graph Database**: Use Neo4j as the graph database to store and query the extracted information.
 
+``` bash
+docker run \
+    --publish=7474:7474 --publish=7687:7687 \
+    --volume=$HOME/neo4j/data:/data \
+    neo4j
+```
+
 - [ ] **Graph Visualization**: Use a graph visualization library, such as D3.js or Cytoscape.js, to display graphs.
 
 - [ ] **Ihor/gliner-biomed-bi-large-v1.0**: Use the [Ihor/gliner-biomed-bi-large-v1.0](https://huggingface.co/Ihor/gliner-biomed-bi-large-v1.0) model for named entity recognition (NER). This model is specifically designed for biomedical text and should be able to extract relevant information from clinical notes.
