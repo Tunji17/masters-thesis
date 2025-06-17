@@ -24,9 +24,7 @@
 - 1.4 Ethical Considerations and Data Privacy
   - 1.4.1 Handling Sensitive Clinical Information
   - 1.4.2 Privacy-Preserving Techniques
-  - 1.4.3 Regulatory Compliance
 - 1.5 Thesis Contributions
-- 1.6 Thesis Structure
 
 ### Chapter 2: Literature Review and Theoretical Background
 
