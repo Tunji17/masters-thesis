@@ -38,7 +38,7 @@ docker run \
 
 - [ ] **Ihor/gliner-biomed-bi-large-v1.0**: Use the [Ihor/gliner-biomed-bi-large-v1.0](https://huggingface.co/Ihor/gliner-biomed-bi-large-v1.0) model for named entity recognition (NER). This model is specifically designed for biomedical text and should be able to extract relevant information from clinical notes.
 
-- [ ] **Entity linking**: Explore the use of entity linking techniques to improve the accuracy of named entity recognition. This could involve using external knowledge bases, such as wikipedia.
+- [ ] **Entity linking**: Explore the use of entity linking techniques to improve the accuracy of named entity recognition. This could involve using external knowledge bases, such as wikipedia. (Wikipedia is not a good source for clinical notes, but it could be used to link entities to other relevant information.)
 
 - [ ] **Closed Information Extraction Extraction**: I need a smart and cheap way to extract relationships between the NEs. This could involve using a reasoning model.(Qwen3 32b??). This model could also be used to generate Cypher scripts for training.
 
