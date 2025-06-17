@@ -1,6 +1,9 @@
-# Thesis Structure - Table of Contents
+# Thesis Topic: Transforming Unstructured Clinical Text into Actionable Knowledge Graphs: A Multi-Model Approach for Healthcare Information Extraction
+
+## Thesis Structure - Table of Contents
 
 ## Front Matter (preserved)
+
 - Declaration of Authorship
 - Abstract  
 - Acknowledgements
@@ -8,6 +11,7 @@
 ## Main Chapters
 
 ### Chapter 1: Introduction
+
 - 1.1 Background and Context
   - 1.1.1 Clinical Documentation in Healthcare
   - 1.1.2 Challenges with Unstructured Clinical Data
@@ -25,6 +29,7 @@
 - 1.6 Thesis Structure
 
 ### Chapter 2: Literature Review and Theoretical Background
+
 - 2.1 Natural Language Processing in Healthcare
   - 2.1.1 Evolution of Clinical NLP
   - 2.1.2 Current State-of-the-Art Approaches
@@ -48,6 +53,7 @@
 - 2.5 Related Work Summary and Research Gap
 
 ### Chapter 3: Methodology
+
 - 3.1 Research Design Overview
   - 3.1.1 System Architecture
   - 3.1.2 Pipeline Components
@@ -72,6 +78,7 @@
   - 3.6.3 Data Storage Strategy
 
 ### Chapter 4: Comparative Analysis: MedGemma vs Gemma Models
+
 - 4.1 Model Architectures and Capabilities
   - 4.1.1 MedGemma: Medical-Specific Foundation Model
   - 4.1.2 Gemma: General-Purpose Language Model
@@ -88,6 +95,7 @@
 - 4.5 Expected Outcomes and Hypotheses
 
 ### Chapter 5: Experimental Setup and Implementation
+
 - 5.1 Development Environment
   - 5.1.1 Hardware Configuration (Apple Silicon/MLX)
   - 5.1.2 Software Dependencies
@@ -109,6 +117,7 @@
   - 5.5.3 Scalability Challenges
 
 ### Chapter 6: Results and Evaluation
+
 - 6.1 Named Entity Recognition Results
   - 6.1.1 Entity Detection Performance
   - 6.1.2 Entity Counts and Distribution
@@ -131,6 +140,7 @@
 - 6.5 Statistical Significance Testing
 
 ### Chapter 7: Discussion
+
 - 7.1 Interpretation of Results
   - 7.1.1 Key Findings Summary
   - 7.1.2 Model Performance Insights
@@ -149,6 +159,7 @@
 - 7.5 Practical Deployment Considerations
 
 ### Chapter 8: Conclusions and Future Work
+
 - 8.1 Summary of Contributions
   - 8.1.1 Technical Contributions
   - 8.1.2 Theoretical Contributions
@@ -163,5 +174,6 @@
 - 8.5 Final Remarks
 
 ## Back Matter (preserved)
+
 - Bibliography
 - Appendices
