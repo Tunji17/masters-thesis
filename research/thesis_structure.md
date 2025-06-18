@@ -37,8 +37,9 @@
   - 2.2.3 Biomedical Language Models
 - 2.3 Entity Linking Techniques
   - 2.3.1 Knowledge Base Linking Methods
-  - 2.3.2 Wikipedia as a Medical Knowledge Source
-  - 2.3.3 Challenges in Medical Entity Linking
+  - 2.3.2 UMLS and MeSH Knowledge Bases
+  - 2.3.3 SciSpacy's TF-IDF Character N-gram Matching
+  - 2.3.4 Challenges in Medical Entity Linking
 - 2.4 From Relationship Extraction to Knowledge Graphs
   - 2.4.1 Relationship Extraction Methods
     - 2.4.1.1 Rule-Based Approaches
@@ -61,7 +62,10 @@
 - 3.3 Named Entity Recognition Approach
   - 3.3.1 GLiNER Model Selection
   - 3.3.2 Entity Types and Categories
-  - 3.3.3 Entity Linking with Wikipedia
+  - 3.3.3 Entity Linking with SciSpacy and UMLS
+  - 3.3.4 Abbreviation Detection and Resolution
+  - 3.3.5 Confidence-Based Entity Filtering
+  - 3.3.6 Multi-Candidate Entity Linking
 - 3.4 Relationship Extraction Methodology
   - 3.4.1 Model Selection Criteria
   - 3.4.2 Prompt Engineering
@@ -99,6 +103,8 @@
   - 5.1.2 Software Dependencies
 - 5.2 Implementation Details
   - 5.2.1 NER Pipeline Implementation
+    - 5.2.1.1 SciSpacy Pipeline Integration
+    - 5.2.1.2 UMLS Knowledge Base Loading
   - 5.2.2 Relationship Extraction Implementation
   - 5.2.3 Graph Database Setup
 - 5.3 Data Flow from Dataset to Neo4j
@@ -119,7 +125,10 @@
 - 6.1 Named Entity Recognition Results
   - 6.1.1 Entity Detection Performance
   - 6.1.2 Entity Counts and Distribution
-  - 6.1.3 Entity Linking Accuracy
+  - 6.1.3 UMLS Entity Linking Accuracy
+  - 6.1.4 Confidence Score Distributions
+  - 6.1.5 Semantic Type Analysis
+  - 6.1.6 Abbreviation Resolution Performance
 - 6.2 Relationship Extraction Results
   - 6.2.1 MedGemma Performance Analysis
   - 6.2.2 Gemma Performance Analysis
@@ -127,9 +136,10 @@
   - 6.2.4 Relationship Recall and Precision
 - 6.3 Graph Construction Outcomes
   - 6.3.1 Graph Quality Metrics
-    - 6.3.1.1 Number of Unique Entities
+    - 6.3.1.1 Number of Unique Entities with UMLS CUIs
     - 6.3.1.2 Relationship Triple Statistics
     - 6.3.1.3 Graph Connectivity Measures
+    - 6.3.1.4 Semantic Type Distribution in Graph
   - 6.3.2 Cypher Query Generation Success Rate
   - 6.3.3 Query Performance Analysis
 - 6.4 Error Analysis
@@ -147,7 +157,8 @@
   - 7.2.2 Research Applications
 - 7.3 Comparison with Existing Approaches
   - 7.3.1 Advantages of the Proposed Method
-  - 7.3.2 Trade-offs and Considerations
+  - 7.3.2 SciSpacy UMLS vs General Knowledge Bases
+  - 7.3.3 Trade-offs and Considerations
 - 7.4 Limitations of the Study
   - 7.4.1 Dataset Limitations
     - 7.4.1.1 Dataset Availability Constraints
@@ -164,7 +175,7 @@
 - 8.2 Achievement of Research Objectives
 - 8.3 Future Research Directions
   - 8.3.1 Model Improvements
-  - 8.3.2 Improving Entity Linking
+  - 8.3.2 Expanding Beyond UMLS to Other Medical Knowledge Bases
   - 8.3.3 Scaling to Larger Clinical Corpora
   - 8.3.4 Extended Applications
   - 8.3.5 Multi-modal Information Extraction
