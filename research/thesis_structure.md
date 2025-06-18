@@ -53,31 +53,23 @@
 
 ### Chapter 3: Methodology
 
-- 3.1 Research Design Overview
-  - 3.1.1 System Architecture
-  - 3.1.2 Pipeline Components
-- 3.2 Data Collection and Preparation
-  - 3.2.1 Clinical Notes Dataset
-  - 3.2.2 Data Preprocessing
-- 3.3 Named Entity Recognition Approach
-  - 3.3.1 GLiNER Model Selection
-  - 3.3.2 Entity Types and Categories
-  - 3.3.3 Entity Linking with SciSpacy and UMLS
-  - 3.3.4 Abbreviation Detection and Resolution
-  - 3.3.5 Confidence-Based Entity Filtering
-  - 3.3.6 Multi-Candidate Entity Linking
-- 3.4 Relationship Extraction Methodology
-  - 3.4.1 Model Selection Criteria
-  - 3.4.2 Prompt Engineering
-  - 3.4.3 Output Parsing and Validation
-- 3.5 Parallel Processing and Efficiency
-  - 3.5.1 ThreadPoolExecutor Implementation
-  - 3.5.2 Batch Processing Strategy
-  - 3.5.3 Resource Optimization
-- 3.6 Graph Construction Process
-  - 3.6.1 Cypher Query Generation
-  - 3.6.2 Graph Schema Design
-  - 3.6.3 Data Storage Strategy
+- 3.1 System Architecture and Pipeline
+  - 3.1.1 Overall System Design
+  - 3.1.2 Component Integration Flow
+- 3.2 Data and Preprocessing
+  - 3.2.1 Clinical Notes Dataset and Preparation
+- 3.3 Entity Recognition and Linking
+  - 3.3.1 GLiNER Model for Medical Entity Recognition
+  - 3.3.2 UMLS Entity Linking with SciSpacy
+  - 3.3.3 Confidence Scoring and Abbreviation Detection
+- 3.4 Relationship Extraction
+  - 3.4.1 Model Selection and Prompt Engineering
+  - 3.4.2 Output Parsing and Validation
+- 3.5 Knowledge Graph Construction
+  - 3.5.1 Graph Schema Design
+  - 3.5.2 Cypher Query Generation and Storage
+- 3.6 Implementation Optimization
+  - 3.6.1 Parallel Processing and Resource Management
 
 ### Chapter 4: Comparative Analysis: MedGemma vs Gemma Models
 
