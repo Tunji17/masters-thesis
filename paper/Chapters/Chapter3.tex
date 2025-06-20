@@ -12,7 +12,7 @@ This chapter details the multi-model methodology for transforming unstructured c
 
 \subsection{Overall System Design}
 
-The proposed system follows a modular pipeline architecture, where each stage transforms the clinical text and feeds into the next stage. Figure~\ref{fig:pipeline} outlines the architecture with its major components and data flow:
+The proposed system follows a modular pipeline architecture, where each stage transforms the clinical text and feeds into the next stage. The architecture consists of the following major components and data flow:
 
 \begin{enumerate}
 \item \textbf{Input and Preprocessing:} Raw clinical notes (free-text) are first collected and preprocessed (cleaning, formatting) to ensure consistent input for NLP tasks.
@@ -44,7 +44,7 @@ Throughout this flow, \textbf{state is maintained} so that each mention's contex
 
 \subsection{Clinical Notes Dataset and Preparation}
 
-Our dataset consists of unstructured clinical notes that include various document types such as discharge summaries, progress notes, and radiology reports. These notes are written in natural language by healthcare professionals and often contain domain-specific terminology, abbreviations, and sensitive information. Before applying the NLP pipeline, we perform several preprocessing steps to prepare this data:
+Our dataset consists of unstructured clinical notes from the \textbf{AGBonnet/augmented-clinical-notes} dataset, which contains synthetic clinical documentation that mimics real-world medical narratives. The dataset includes various document types such as discharge summaries, progress notes, and radiology reports. These notes are written in natural language by healthcare professionals and often contain domain-specific terminology, abbreviations, and medical entities. The dataset provides a realistic representation of clinical text while ensuring patient privacy through synthetic data generation. Before applying the NLP pipeline, we perform several preprocessing steps to prepare this data:
 
 \begin{itemize}
 \item \textbf{De-identification:} To address privacy and ethical considerations, all Protected Health Information (PHI) in the notes is removed or obfuscated. This includes patient names, IDs, dates, and locations (in accordance with HIPAA guidelines). In practice, we either use an automated de-identification tool or rely on the dataset being pre-deidentified by its provider (as is common with public clinical corpora).
