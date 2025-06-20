@@ -71,108 +71,49 @@
 - 3.6 Implementation Optimization
   - 3.6.1 Parallel Processing and Resource Management
 
-### Chapter 4: Comparative Analysis: MedGemma vs Gemma Models
+### Chapter 4: Implementation and Comparative Analysis: MedGemma vs Gemma Models
 
-- 4.1 Model Architectures and Capabilities
-  - 4.1.1 MedGemma: Medical-Specific Foundation Model
-  - 4.1.2 Gemma: General-Purpose Language Model
-- 4.2 Relationship Extraction Focus
-  - 4.2.1 Why Relationship Extraction Matters for Graph Quality
-  - 4.2.2 Model-Specific Strengths and Weaknesses
-- 4.3 Comparative Metrics Design
-  - 4.3.1 Relationship Accuracy Metrics
-  - 4.3.2 Graph Generation Quality Metrics
-  - 4.3.3 Domain-Specific Evaluation Criteria
-- 4.4 Experimental Design for Model Comparison
-  - 4.4.1 Test Dataset Preparation
-  - 4.4.2 Evaluation Protocol
-- 4.5 Expected Outcomes and Hypotheses
+- 4.1 Implementation Environment
+  - 4.1.1 MLX Framework and Apple Silicon Optimization
+  - 4.1.2 Development Setup and Dependencies
+- 4.2 Language Model Comparison for Relationship Extraction
+  - 4.2.1 MedGemma vs Gemma: Architecture and Domain Specialization
+  - 4.2.2 Comparative Evaluation Framework
+  - 4.2.3 Prompt Engineering and Output Processing
+- 4.3 Experimental Validation
+  - 4.3.1 Testing Protocol and Performance Metrics
+  - 4.3.2 Implementation Constraints and Scalability
 
-### Chapter 5: Experimental Setup and Implementation
+### Chapter 5: Results, Evaluation and Discussion
 
-- 5.1 Development Environment
-  - 5.1.1 Hardware Configuration (Apple Silicon/MLX)
-  - 5.1.2 Software Dependencies
-- 5.2 Implementation Details
-  - 5.2.1 NER Pipeline Implementation
-    - 5.2.1.1 SciSpacy Pipeline Integration
-    - 5.2.1.2 UMLS Knowledge Base Loading
-  - 5.2.2 Relationship Extraction Implementation
-  - 5.2.3 Graph Database Setup
-- 5.3 Data Flow from Dataset to Neo4j
-  - 5.3.1 Clinical Note Processing
-  - 5.3.2 Entity and Relationship Extraction
-  - 5.3.3 Cypher Query Generation Pipeline
-  - 5.3.4 Graph Population Process
-- 5.4 Testing and Validation Framework
-  - 5.4.1 Unit Testing Approach
-  - 5.4.2 Integration Testing
-- 5.5 Limitations of In-Notebook Execution
-  - 5.5.1 Memory Constraints
-  - 5.5.2 Compute Resource Limitations
-  - 5.5.3 Scalability Challenges
+- 5.1 Experimental Results
+  - 5.1.1 Named Entity Recognition Performance
+  - 5.1.2 Model Comparison: MedGemma vs Gemma
+  - 5.1.3 Knowledge Graph Construction Outcomes
+- 5.2 Performance Analysis and Evaluation
+  - 5.2.1 Quantitative Analysis and Statistical Testing
+  - 5.2.2 Error Analysis and Model Limitations
+  - 5.2.3 Graph Quality Metrics
+- 5.3 Discussion and Implications
+  - 5.3.1 Key Findings and Model Performance Insights
+  - 5.3.2 Comparison with Existing Approaches
+  - 5.3.3 Healthcare Applications and Practical Considerations
+- 5.4 Study Limitations and Constraints
+  - 5.4.1 Dataset and Methodological Limitations
+  - 5.4.2 Implementation Constraints
 
-### Chapter 6: Results and Evaluation
+### Chapter 6: Conclusions and Future Work
 
-- 6.1 Named Entity Recognition Results
-  - 6.1.1 Entity Detection Performance
-  - 6.1.2 Entity Counts and Distribution
-  - 6.1.3 UMLS Entity Linking Accuracy
-  - 6.1.4 Confidence Score Distributions
-  - 6.1.5 Semantic Type Analysis
-  - 6.1.6 Abbreviation Resolution Performance
-- 6.2 Relationship Extraction Results
-  - 6.2.1 MedGemma Performance Analysis
-  - 6.2.2 Gemma Performance Analysis
-  - 6.2.3 Comparative Results
-  - 6.2.4 Relationship Recall and Precision
-- 6.3 Graph Construction Outcomes
-  - 6.3.1 Graph Quality Metrics
-    - 6.3.1.1 Number of Unique Entities with UMLS CUIs
-    - 6.3.1.2 Relationship Triple Statistics
-    - 6.3.1.3 Graph Connectivity Measures
-    - 6.3.1.4 Semantic Type Distribution in Graph
-  - 6.3.2 Cypher Query Generation Success Rate
-  - 6.3.3 Query Performance Analysis
-- 6.4 Error Analysis
-  - 6.4.1 Common Failure Patterns
-  - 6.4.2 Model Limitations
-- 6.5 Statistical Significance Testing
-
-### Chapter 7: Discussion
-
-- 7.1 Interpretation of Results
-  - 7.1.1 Key Findings Summary
-  - 7.1.2 Model Performance Insights
-- 7.2 Implications for Healthcare Information Extraction
-  - 7.2.1 Clinical Applications
-  - 7.2.2 Research Applications
-- 7.3 Comparison with Existing Approaches
-  - 7.3.1 Advantages of the Proposed Method
-  - 7.3.2 SciSpacy UMLS vs General Knowledge Bases
-  - 7.3.3 Trade-offs and Considerations
-- 7.4 Limitations of the Study
-  - 7.4.1 Dataset Limitations
-    - 7.4.1.1 Dataset Availability Constraints
-    - 7.4.1.2 Data Quality Issues
-  - 7.4.2 Methodological Constraints
-  - 7.4.3 Manual Verification Requirements for Clinical Data
-- 7.5 Practical Deployment Considerations
-
-### Chapter 8: Conclusions and Future Work
-
-- 8.1 Summary of Contributions
-  - 8.1.1 Technical Contributions
-  - 8.1.2 Theoretical Contributions
-- 8.2 Achievement of Research Objectives
-- 8.3 Future Research Directions
-  - 8.3.1 Model Improvements
-  - 8.3.2 Expanding Beyond UMLS to Other Medical Knowledge Bases
-  - 8.3.3 Scaling to Larger Clinical Corpora
-  - 8.3.4 Extended Applications
-  - 8.3.5 Multi-modal Information Extraction
-- 8.4 Recommendations for Practitioners
-- 8.5 Final Remarks
+- 6.1 Summary of Contributions
+  - 6.1.1 Technical Contributions
+  - 6.1.2 Theoretical Contributions
+- 6.2 Achievement of Research Objectives
+- 6.3 Future Research Directions
+  - 6.3.1 Model Improvements
+  - 6.3.2 Expanding Beyond UMLS to Other Medical Knowledge Bases
+  - 6.3.3 Scaling to Larger Clinical Corpora
+  - 6.3.4 Multi-modal Information Extraction
+- 6.4 Final Remarks
 
 ## Back Matter (preserved)
 
