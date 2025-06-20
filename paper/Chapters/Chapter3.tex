@@ -1,0 +1,255 @@
+% Chapter 3
+
+\chapter{Methodology} % Main chapter title
+
+\label{Chapter3} % For referencing the chapter elsewhere, use \ref{Chapter3}
+
+%----------------------------------------------------------------------------------------
+
+This chapter details the multi-model methodology for transforming unstructured clinical notes into a structured medical knowledge graph. The overall approach is a \textbf{pipeline} that sequentially performs entity recognition, entity linking, relationship extraction, and graph construction. By chaining specialized components, the system produces an \textbf{interpretable representation of medical concepts (e.g. drugs, diseases) and the relations among them}, enabling integration of context and supporting clinical insights. Key design decisions, data preprocessing steps, model configurations, and implementation optimizations are discussed in the following sections.
+
+\section{System Architecture and Pipeline}
+
+\subsection{Overall System Design}
+
+The proposed system follows a modular pipeline architecture, where each stage transforms the clinical text and feeds into the next stage. Figure~\ref{fig:pipeline} outlines the architecture with its major components and data flow:
+
+\begin{enumerate}
+\item \textbf{Input and Preprocessing:} Raw clinical notes (free-text) are first collected and preprocessed (cleaning, formatting) to ensure consistent input for NLP tasks.
+\item \textbf{Entity Recognition:} A medical Named Entity Recognition (NER) model identifies spans of text corresponding to clinical concepts (e.g. diseases, medications, procedure, body site). We employ the GLiNER model for this step (see Section~\ref{sec:gliner}).
+\item \textbf{Entity Linking:} Detected entity mentions are normalized and linked to a canonical identifier in a medical knowledge base. We use SciSpacy's UMLS linker to map each mention to a UMLS Concept Unique Identifier (CUI), providing standardized meanings (Section~\ref{sec:entitylinking}).
+\item \textbf{Relationship Extraction:} A large language model (LLM) processes the linked entity list and full text to extract relationships between the medical entities. The model outputs structured triple relationship assertions (Section~\ref{sec:relationextraction}).
+\item \textbf{Knowledge Graph Construction:} The extracted entities and relationships are inserted into a Neo4j graph database. Nodes represent medical concepts (annotated with UMLS CUIs and types) and edges represent the relationships between concepts. Cypher queries are generated to create or merge these graph elements (Section~\ref{sec:graphconstruction}).
+\item \textbf{Post-processing \& Optimization:} Throughout the pipeline, confidence filters, validation checks, and parallelization are applied to ensure quality and efficiency (Section~\ref{sec:optimization}).
+\end{enumerate}
+
+Each component addresses a specific task, and their integration yields a coherent end-to-end system. This design allows independent optimization of each module and the ability to swap models if needed. The multi-step \textbf{``recognition–linking–relation extraction–graph loading''} strategy aligns with recommended knowledge graph construction practices, ensuring that unstructured text is incrementally converted into a structured, interoperable knowledge graph.
+
+\subsection{Component Integration Flow}
+
+The flow of data between components is carefully orchestrated to preserve context and accuracy. The pipeline is implemented as a \textit{sequential workflow} where each module consumes the outputs of previous steps:
+
+\begin{itemize}
+\item The \textbf{Preprocessing} stage standardizes the input. This may include lowercasing (if required by the NER model), removing extraneous whitespace or headers, and ensuring patient-identifying information is excluded for privacy (see Section~\ref{sec:datapreprocessing}).
+\item The \textbf{NER component} (GLiNER) is applied next on the cleaned text. It produces a set of entity mentions (text spans) each with an entity type (e.g. \textit{Condition}, \textit{Drug}, \textit{Test}). These mentions are passed forward as Python objects (e.g. spaCy \texttt{Span} objects) attached to the document representation.
+\item The \textbf{Entity Linking} module (SciSpacy's \texttt{EntityLinker}) takes each NER-detected span and searches for candidate concepts in the UMLS knowledge base. Because this linker is integrated as a spaCy pipeline component, it can enrich the detected \texttt{Span} with a list of candidate CUIs and similarity scores (available via \texttt{Span.\_.kb\_ents}). We configure the linker to resolve abbreviations and to attach the top-ranked CUI for each mention above a confidence threshold (details in Section~\ref{sec:confidence}). The result is that each entity mention from NER is now linked to a unique medical concept ID or marked as \textit{unlinkable} if no high-confidence match is found.
+\item For \textbf{Relationship Extraction}, the entire clinical note along with the recognized entities is provided to the LLM. In practice, we construct a prompt that includes the text and possibly the list of identified entities, asking the model to output relationships (e.g. cause/effect, treatment, associations) among those entities. The integration is such that the model's output can be traced back to the original entities by name or CUI. This output is captured as structured relation triples.
+\item Finally, the \textbf{Graph Construction} module translates the entities and relations into Cypher queries. The integration here uses the results of previous steps (entity CUIs, names, types, and relation types) to form \texttt{MERGE} statements. For example, if ``C0011849'' (Diabetes mellitus) and ``C0027796'' (Neuropathy) are two CUIs with a \textit{causes} relationship, the pipeline will generate a Cypher command to \texttt{MERGE} nodes for each (with labels/types) and a \texttt{[:CAUSES]} relationship between them. These queries are executed on the Neo4j database to update the knowledge graph.
+\end{itemize}
+
+Throughout this flow, \textbf{state is maintained} so that each mention's context is known. For instance, if an LLM-produced relationship mentions an entity not recognized by NER, we detect that during parsing and handle it (either by discarding that relation or attempting to link the new entity, as discussed in Section~\ref{sec:outputparsing}). This ensures consistency: only vetted entities make it into the graph. The sequential integration also means errors can propagate (e.g. a linking error could affect relation extraction), so each component is tuned to maximize precision, and wherever possible, the pipeline includes verification steps (for example, ensuring that relation arguments have valid CUIs). The design balances modularity with tight integration, creating a robust system to extract structured knowledge from clinical text.
+
+\section{Data and Preprocessing}
+\label{sec:datapreprocessing}
+
+\subsection{Clinical Notes Dataset and Preparation}
+
+Our dataset consists of unstructured clinical notes that include various document types such as discharge summaries, progress notes, and radiology reports. These notes are written in natural language by healthcare professionals and often contain domain-specific terminology, abbreviations, and sensitive information. Before applying the NLP pipeline, we perform several preprocessing steps to prepare this data:
+
+\begin{itemize}
+\item \textbf{De-identification:} To address privacy and ethical considerations, all Protected Health Information (PHI) in the notes is removed or obfuscated. This includes patient names, IDs, dates, and locations (in accordance with HIPAA guidelines). In practice, we either use an automated de-identification tool or rely on the dataset being pre-deidentified by its provider (as is common with public clinical corpora).
+\item \textbf{Format Normalization:} The notes are normalized for consistent formatting. For example, irregular whitespace, line breaks, or punctuation are standardized. Sections like ``Patient History:'' or template headers might be stripped out if not relevant, as they can confuse the NER model. We ensure the text encoding is uniform (UTF-8) and fix any encoding-related artifacts.
+\item \textbf{Segmentation:} Although our NER and relation extraction models can handle entire documents, segmenting the text into smaller units (like sentences or paragraphs) can improve accuracy. We apply sentence boundary detection to break each note into sentences. This segmentation allows the relationship extraction model to consider one informational unit at a time, reducing confusion from very long contexts. The sentence splitter is carefully tuned for clinical text, which often contains non-standard punctuation (for example, ``Dr.'' should not end a sentence).
+\item \textbf{Spelling and Abbreviation Expansion:} Clinical notes often contain domain-specific shorthand (e.g., ``HTN'' for hypertension). While our pipeline has a dedicated abbreviation detection step (Section~\ref{sec:confidence}), in preprocessing we compile a lexicon of common shorthand terms and ensure they can be recognized. We do not perform aggressive spelling correction, since misspellings might be rare or could unintentionally alter clinical meaning, but obvious OCR errors or gibberish are cleaned if encountered.
+\end{itemize}
+
+After preprocessing, the clinical notes are in a clean and standardized form, ready for the NLP pipeline. The integrity of clinical content is preserved (we ensure clinical meaning is not lost during cleaning). This careful preparation facilitates better entity recognition and linking, as the text is closer to the forms the models were trained or tuned on. It also helps avoid cascading errors – for example, ensuring abbreviations are consistently detected by placing the Abbreviation Detector early in the pipeline (right after sentence segmentation and tokenization). Overall, these steps address the \textbf{``garbage in, garbage out''} concern: by improving input quality, we improve the reliability of the extracted knowledge.
+
+\section{Entity Recognition and Linking}
+
+\subsection{GLiNER Model for Medical Entity Recognition}
+\label{sec:gliner}
+
+For identifying medical entities in text, we utilize the \textbf{GLiNER} model – a \textit{Generalist and Lightweight Named Entity Recognition} framework adapted for biomedical data. Traditional NER in the medical domain is challenging because of the vast and evolving vocabulary in healthcare (new diseases, drugs, gene names, etc.) and the limited availability of labeled training data. Many classical NER models are constrained to a fixed set of entity types and struggle with novel or specialized terms. GLiNER offers a solution through \textbf{open-domain, zero-shot NER}: instead of relying on a fixed taxonomy of entity types, it uses \textit{natural language descriptors} of entity categories to recognize entities in text. In other words, we can prompt GLiNER with definitions like ``medical condition'' or ``drug name,'' and the model will identify spans of text that seem to be instances of those categories.
+
+GLiNER-BioMed, the biomedical adaptation of this model, was introduced to leverage large language models for annotation and then distill that knowledge into a smaller, efficient NER model. The developers generated high-coverage synthetic training data by using an LLM to label text, then trained GLiNER models (using uni-encoder and bi-encoder Transformer architectures) on this data. The result is a model that achieves state-of-the-art performance on biomedical NER tasks, with about a 6\% F1-score improvement over previous best systems in zero-shot scenarios. This performance gain is statistically significant (p < 0.001) and highlights the effectiveness of the synthetic data and zero-shot approach \parencite{Stenetorp2024}.
+
+In our pipeline, we chose GLiNER for its ability to generalize. We configured GLiNER with \textbf{medical entity type prompts} corresponding to the kinds of concepts we expect in clinical notes. These include at least: \textit{Problem/Condition}, \textit{Treatment/Drug}, \textit{Test/Procedure}, and possibly others like \textit{Anatomy} or \textit{Demographic} if needed. By providing these descriptions, GLiNER can tag entities in the text without needing explicit retraining on our specific dataset. For example, given a sentence \textit{``The patient was started on metformin for diabetes mellitus''}, GLiNER is expected to identify \textbf{``metformin''} as a Drug and \textbf{``diabetes mellitus''} as a Condition, even if it has never seen those exact terms in training, because it understands from the prompt that it should find any medication name and any disease name.
+
+Another advantage of GLiNER is its \textbf{lightweight architecture} – it is much smaller and faster than a full LLM, making it suitable for scanning long documents. It effectively \textit{distills} the linguistic knowledge of larger models into a specialized NER task. This means we can run GLiNER using available compute (Apple Silicon CPU/GPU) with reasonable speed, which is crucial given the size of clinical text data.
+
+\subsection{UMLS Entity Linking with SciSpacy}
+\label{sec:entitylinking}
+
+Once entities are recognized in the text, we perform \textbf{entity linking} to anchor these mentions to a standardized medical ontology. We use SciSpacy's UMLS \textbf{EntityLinker}, a component designed for biomedical entity normalization. SciSpacy is a library that provides spaCy models and utilities tailored to scientific/clinical text \parencite{Neumann2019}. Its entity linker contains a built-in knowledge base derived from the \textbf{Unified Medical Language System (UMLS)} Metathesaurus, which integrates millions of biomedical concepts (diseases, drugs, procedures, etc.) from various vocabularies.
+
+SciSpacy's linking algorithm operates on a \textbf{string similarity} basis using \textit{character n-grams}. Specifically, it represents each entity mention (the text span) as a bag-of-character-trigrams and uses a \textbf{TF-IDF weighted vector} for those trigrams. Likewise, every candidate concept name (and its aliases) in UMLS is indexed by its character trigrams. The linker then performs an approximate nearest neighbor search in this vector space to find the UMLS concepts whose names are most similar to the mention text. In effect, it finds concepts with overlapping substrings – a robust approach in biomedical text where many terms are lexical variants. For example, a mention ``cardiac infarction'' would have a high trigram overlap with the UMLS concept \textit{``Myocardial Infarction''} (since ``infarction'' overlaps, and ``cardiac'' vs ``myocardial'' share some common roots).
+
+We configured the SciSpacy linker with \texttt{linker\_name="umls"} and enabled abbreviation resolution (\texttt{resolve\_abbreviations=True}), meaning it will leverage the Abbreviation Detector (if present in the pipeline) to expand short forms before linking. The UMLS knowledge base used includes Level 0,1,2, and 9 vocabularies by default (which comprise the primary UMLS concepts) totaling roughly 3 million concepts. This is a comprehensive dictionary, ensuring that most medical terms found by NER can be linked to some concept. We also kept the default \textbf{similarity threshold} of 0.7 for linking, which means the linker will only assign a concept to a mention if the cosine similarity between their TF-IDF trigram vectors is $\geq$ 0.7. This threshold helps filter out tenuous matches and improves precision.
+
+During linking, SciSpacy produces for each entity a list of candidate concept IDs with similarity scores. In our implementation, we take the top-ranked candidate as the linked concept, provided its score exceeds the threshold. For example, if the mention ``metformin'' is processed, the linker might return candidates like (CUI: C0025598, ``Metformin'', score 0.98) and some others like (CUI for ``Metformin Hydrochloride'', score 0.95). We would select C0025598 (Metformin) as the linked concept, since it's a near-exact match with high confidence. This linking yields the \textit{canonical representation} of each entity: instead of just a surface text, we now have a UMLS Concept Unique Identifier (CUI) and can retrieve that concept's standardized name, definition, and semantic type.
+
+Linking to UMLS is crucial for building a \textbf{knowledge graph that is interoperable}. By grounding entities to UMLS CUIs, our graph's nodes align with a well-established ontology, facilitating integration with other healthcare data sources and enabling queries that leverage hierarchy (e.g. finding all \textit{antibiotics} related to an infection, because UMLS knows which drugs are antibiotics). It also helps consolidate synonyms: mentions ``heart attack'' and ``myocardial infarction'' will link to the same CUI (C0027051), resulting in one node for that condition in the graph. This normalization greatly enriches the utility of the knowledge graph by avoiding duplication and linking equivalent terms \parencite{UMLS2024}.
+
+\subsection{Confidence Scoring and Abbreviation Detection}
+\label{sec:confidence}
+
+In this stage, we refine the outputs of NER and linking by incorporating confidence measures and handling abbreviations explicitly:
+
+\begin{itemize}
+\item \textbf{Confidence Scoring:} Both the NER model and the linker provide internal scores. GLiNER, being a transformer model, likely produces probabilities for each token's label; however, as a zero-shot approach it may not output a traditional confidence. Regardless, after entity linking, we use the \textbf{similarity score} from SciSpacy's linker as a proxy for confidence in the entity's identification. If the top candidate for a mention only has, say, 0.4 similarity, it is likely a poor match; in such cases we may decide not to assign any CUI (thus the entity might be dropped or flagged for manual review). On the other hand, a high score (close to 1.0) indicates a very confident match. The SciSpacy linker's threshold of 0.7 is one gating mechanism. We further examine the distribution of scores: for example, if an entity's best match is 0.72 and second best is 0.71, that's ambiguous; if best is 0.85 and second is 0.60, that's clear-cut. In our implementation, we set an additional threshold such that if the top score is below 0.7, we mark the entity as ``Unlinked'' (no reliable concept). If it's above 0.9, we accept it outright. For intermediate cases (0.7–0.9), we accept but mark them as lower confidence. These confidence flags will be considered later during graph analysis and filtering (so that low-confidence edges could be ignored or reviewed). Essentially, each extracted node carries a confidence, and each relationship (which depends on nodes and LLM output) will also carry a confidence score (see Section~\ref{sec:outputparsing} for relation confidence handling). This approach helps maintain the quality of the knowledge graph by minimizing the inclusion of spurious or erroneous nodes/edges.
+
+\item \textbf{Abbreviation Detection:} Clinical notes are replete with abbreviations and acronyms. To correctly link entities, it's important to resolve abbreviations to their full forms. We integrate SciSpacy's \textbf{AbbreviationDetector} into the pipeline prior to linking. This component implements the Schwartz \& Hearst (2003) algorithm for finding definitions of abbreviations in text \parencite{Schwartz2003}. It works by scanning for patterns like ``Full Form (Abbr)'' in a sentence. For example, in \textit{``Patient has chronic obstructive pulmonary disease (COPD)''}, it will detect that \textbf{``COPD''} is an abbreviation for \textbf{``chronic obstructive pulmonary disease''}. Once detected, SciSpacy will annotate \texttt{doc.\_.abbreviations} with a list of abbreviation spans and their expansions (\texttt{span.\_.long\_form}). By enabling \texttt{resolve\_abbreviations=True} in the EntityLinker, we ensure that the linker uses the long form (if available) for finding UMLS candidates. In the given example, instead of trying to match ``COPD'' to UMLS (which it could, since UMLS has abbreviations, but it might rank lower), the linker will match the full phrase ``chronic obstructive pulmonary disease,'' yielding a correct and high-confidence link to CUI C0019061. We found this particularly helpful for ambiguous abbreviations like ``RA,'' which could mean \textit{rheumatoid arthritis} or \textit{right atrium} or \textit{reaction} depending on context – the detector uses local context to find the expansion, improving linking accuracy.
+\end{itemize}
+
+In addition to SciSpacy's automated abbreviation handling, we maintain a dictionary of common clinical abbreviations not explicitly defined in text. For instance, ``HTN'' (hypertension) or ``DM'' (diabetes mellitus) often appear without a defining parenthesis. During preprocessing or post-NER, we check if an entity span exactly matches a known abbreviation from our list and, if so, we substitute the long form for linking. This works in concert with the AbbreviationDetector; the detector covers case-by-case definitions, while the dictionary covers extremely common medical abbreviations that clinicians assume readers know.
+
+By applying confidence scoring and abbreviation resolution, we \textbf{improve the precision and recall} of the entity linking process. High-confidence links and fully expanded terms result in more correct nodes in the graph, and fewer missed entities. These measures also reduce noise for the next stage: the relationship extraction model will receive text where abbreviations are already expanded (in the \texttt{Doc} object's context) and where uncertain entities can be treated cautiously. Overall, this step solidifies the foundation of the knowledge graph by ensuring that we have \textit{trusted, well-defined entities} to work with.
+
+\section{Relationship Extraction}
+\label{sec:relationextraction}
+
+\subsection{Model Selection and Prompt Engineering}
+
+Extracting relationships from clinical text is a complex task, as it involves understanding the semantic connections between medical entities. We approach this with a \textbf{Large Language Model (LLM)} that can interpret the text's meaning and generate relational triples. We consider two LLMs for this task: \textbf{Gemma} and \textbf{MedGemma}. Gemma is a general-purpose language model (built on the Gemma 3 architecture), whereas MedGemma is a specialized variant fine-tuned for medical domain knowledge. MedGemma was developed by Google DeepMind in 2025 as an open model for medical text and has demonstrated advanced medical understanding and clinical reasoning capabilities. Essentially, MedGemma builds on the strengths of Gemma but with domain-specific training, making it more adept at understanding clinical context and terminology \parencite{MedGemma2025,Gemma2025}.
+
+Given the critical nature of accurate relation extraction, we opted to experiment with both models. MedGemma (specifically the 4B variant) is expected to have an edge in capturing medical relationships (e.g., drug–disease interactions, symptom–disease associations), whereas Gemma (general model) provides a baseline to see how a non-medical-tuned model performs on the same task. This comparative aspect will be explored in Chapter 4, but for the methodology, the pipeline is designed to be \textit{model-agnostic} – it can plug in any LLM that accepts a prompt and returns text.
+
+We use a \textbf{prompt-based approach} (in-context learning) rather than fine-tuning, to leverage these models directly on our extraction task. The prompt is carefully engineered to guide the model to output the information in a structured format. Based on best practices from recent studies, a good prompt clearly defines the task, provides examples, and indicates the desired output format \parencite{Reynolds2021}. Our prompt typically consists of instructions like:
+
+\begin{itemize}
+\item A brief task description: e.g., \textit{``Extract all clinically relevant relationships between medical concepts in the following text.''}
+\item A format instruction: e.g., \textit{``Provide the relationships as a list of triples (Subject, Relation, Object) using the exact entity names from the text.''} We explicitly ask for the model to use the entities as mentioned, to ease alignment with CUIs.
+\item Optionally, a few-shot example: for instance, showing the model an example sentence and the extracted triple from it. We might include one or two demonstration pairs if it improves performance, although with very large models often a clear instruction suffices.
+\item The context text: the actual clinical note or a segment of it, possibly truncated to stay within token limits of the model.
+\end{itemize}
+
+An example prompt might be:
+
+\begin{verbatim}
+Extract all relationships between medical entities in the text. 
+Use the format (Entity1, Relation, Entity2).
+Text: "The patient's diabetes caused peripheral neuropathy and 
+he was prescribed gabapentin for pain management."
+Relationships:
+1. (diabetes, causes, peripheral neuropathy)
+2. (gabapentin, treats, pain)
+\end{verbatim}
+
+In this prompt, we provided a made-up example demonstrating the expected output format. The actual note's text would follow after ``Text:'' and we would expect the model's completion to list similar triples.
+
+We also incorporate prompt elements to handle nuances: e.g., instruct the model to ignore trivial relations or to only output relations that are explicitly or implicitly stated (to avoid hallucination). We emphasize that the output should not include any entity not found in the text. This is important because LLMs have a tendency to infer or hallucinate facts; by explicitly saying \textit{``use only entities from the text''}, we reduce the chance the model introduces an unrelated concept.
+
+To summarize, our prompt engineering strategy focuses on clarity, examples, and format enforcement. We aim to push the model to behave almost like a rule-based extractor but backed by its deep understanding of language. This harnesses the best of both worlds: the model's intelligence and a deterministic output scheme. We will quantitatively compare the two chosen models' outputs later, but here it's worth noting that using an LLM for relation extraction aligns with the latest research trends in knowledge graph construction. Large foundation models have been successfully used to perform relation extraction without extensive task-specific training, by virtue of their pre-trained knowledge and language understanding \parencite{Singhal2022}. Our methodology capitalizes on this capability by employing prompt-based LLM queries to extract rich relational information from text that simpler models or rule-based systems might miss.
+
+\subsection{Output Parsing and Validation}
+\label{sec:outputparsing}
+
+After the LLM produces candidate relationships in text form, we need to parse these outputs and validate them before integration into the knowledge graph. This step is critical for maintaining accuracy and consistency, as the raw model output may contain noise or require interpretation.
+
+\begin{itemize}
+\item \textbf{Output Parsing:} Given that we instruct the model to output triples in a structured format (as in the example list format or a JSON), the parser's job is to interpret that format. In many cases, the model's response can be read line by line: each line containing a triple like \texttt{(Entity1, relation, Entity2)}. We implement a parser that uses regex or string splitting to extract the three components of each triple. For example, from a line ``\texttt{(diabetes, causes, peripheral neuropathy)}'', the parser will strip the parentheses and split by comma, yielding subject = ``diabetes'', relation = ``causes'', object = ``peripheral neuropathy''. We then trim whitespace and ensure the text exactly matches something in the original note. If the model returns a JSON structure (less likely in our case, since we kept it simple), we would use a JSON parser to get the fields.
+
+\item \textbf{Entity Matching:} We cross-match the extracted entity text with the list of recognized entities from the NER stage. This is where having the exact text form is important. Ideally, since we told the model to use exact names from text, each Entity1 and Entity2 from the triple should correspond to an NER-identified mention. We do a lookup: for each parsed entity string, find the entity in the document (we can utilize character offsets or a direct string match in the note). If an entity from the model output is not found in the original text or wasn't tagged by NER, this raises a red flag. In such cases, we have a few strategies:
+
+  \begin{itemize}
+  \item If it's a minor variation (e.g. model output ``diabetes'' but text had ``diabetes mellitus''), we can potentially still match it by substring or using the linked CUI (since both share a CUI). Our pipeline can be smart here by checking the UMLS synonyms – \textit{diabetes} as a lay term vs \textit{diabetes mellitus} as formal term are the same concept. We might normalize both and realize they match.
+  \item If it's something entirely not in text, it's likely a hallucination or an inference beyond instruction. We then \textbf{discard that triple}. For example, if the model output a triple with ``insulin'' as an entity but the note never mentioned insulin, this would be dropped. Such validation is supported by known methods; researchers have even used \textit{logit biasing} to prevent models from generating tokens not in the source text. While we did not fine-tune at that level, our post-hoc validation essentially achieves the same outcome by filtering out any extraneous tokens/entities \parencite{Ji2023}.
+  \end{itemize}
+
+\item \textbf{Relation Validation:} We also validate the relation part of each triple. We check that the relation is expressed in a reasonable way (usually a verb or a short phrase). In clinical context, relations might be ``causes,'' ``treats,'' ``indicates,'' ``associates with,'' etc. If the model somehow produced a very lengthy or dubious relation phrase, we could flag it. Additionally, we verify that the relation is not obviously contradicted by context (though automated contradiction detection is hard). At minimum, we ensure the relation is not empty and not identical to the entities (sometimes a model might output something malformed like \texttt{(X, X, Y)} which doesn't make sense, and that would be removed).
+
+\item \textbf{Duplication and Uniqueness:} The parser will also handle duplicates. The LLM might list the same relationship twice or express it in two similar ways. We canonicalize the triple (e.g. by sorting or lowercasing the relation phrase) and use a set to ensure uniqueness. Only unique triples proceed to the graph insertion stage. If the relation is symmetric or if order doesn't matter (e.g. co-occurrence), we would handle that, but in our case most relations are directed (e.g. cause vs caused-by). We treat \texttt{(diabetes, causes, neuropathy)} as distinct from \texttt{(neuropathy, causes, diabetes)} and rely on the model to preserve the correct direction.
+
+\item \textbf{Confidence and Post-Filtering:} Each triple inherits a confidence from the process. Since the LLM doesn't give an explicit probability per relation, we estimate confidence based on the model's overall reliability and the presence of certain keywords. For instance, if the relation phrase was directly taken from the text (e.g. ``caused''), we have high confidence the relation is correctly identified. If the model had to infer something not explicitly stated, confidence is lower. In experiments, we found that MedGemma tends to stick closer to text, whereas a general model might infer more. We thus weight triples from MedGemma slightly higher in confidence by default (this will be quantitatively examined in evaluation). In any case, we allow all extracted triples above a certain basic confidence to be inserted into the graph, but we tag those that are iffy (for potential exclusion in analysis).
+\end{itemize}
+
+As a result of parsing and validation, we obtain a \textbf{clean set of (Subject, Relation, Object)} triples, each linked to UMLS concept IDs via the subject and object. For example, ``(diabetes mellitus, causes, peripheral neuropathy)'' becomes (CUI C0011849, \textit{causes}, CUI C0031117) after we replace the text with the corresponding CUIs from the earlier linking stage. These are now ready to be ingested into the knowledge graph. The validation steps, while reducing quantity slightly, ensure that the \textit{quality of relationships is high} – only those supported by the text and recognized entities are kept. This mitigates the risk of hallucinations or errors from the LLM contaminating the knowledge base. By designing the prompt and parser in tandem, we effectively constrain the LLM's output and then double-check it, achieving a balance between \textbf{completeness and accuracy} in relationship extraction.
+
+\section{Knowledge Graph Construction}
+\label{sec:graphconstruction}
+
+\subsection{Graph Schema Design}
+
+With a list of extracted entities (linked to UMLS) and relations, we define a schema for how these should be represented in the knowledge graph. The schema outlines what node types and relationship types exist, and what properties they carry, ensuring the graph is both expressive and normalized.
+
+\begin{itemize}
+\item \textbf{Node Types and Properties:} In our design, each \textbf{medical entity} becomes a node in the graph. Rather than having dozens of node categories for each fine-grained entity type, we opt for a unified node label, say \textbf{\texttt{:MedicalEntity}}, with properties to encode its attributes. Every node has at least:
+
+  \begin{itemize}
+  \item \textbf{\texttt{cui}}: the UMLS Concept Unique Identifier (as a string). This is the primary key for the node; we assume one node per unique CUI. Using CUI ensures that if the same concept appears in multiple notes, they map to the same node.
+  \item \textbf{\texttt{name}}: a canonical name for the concept. We use the preferred name from UMLS for that CUI (e.g., C0011849 → ``Diabetes Mellitus''). This makes the graph human-readable.
+  \item \textbf{\texttt{sem\_type}}: the semantic type or category of the concept, as defined in UMLS (e.g., T047 for ``Disease or Syndrome'', T121 for ``Pharmacologic Substance''). We might also include a more readable form of the semantic type (like a label ``Disease''). This property allows filtering or subtyping of nodes by broad category (e.g., query all nodes that are diseases).
+  \item Optionally, we store other metadata if available: e.g., \textbf{\texttt{definition}} (a short definition from UMLS), \textbf{\texttt{aliases}} (synonyms), etc. We did not fully exploit these in our core pipeline due to size concerns, but including definitions could help if one were to use the graph for reasoning or verification.
+  \end{itemize}
+
+  We did consider splitting node labels by major semantic group (e.g. \texttt{:Disease}, \texttt{:Drug}, \texttt{:Procedure} labels). This would mirror domain ontology classes and perhaps optimize certain queries. However, UMLS semantic types are numerous, and a node can have multiple semantic types. For simplicity, we use a single label and rely on the \texttt{sem\_type} property for distinguishing types. This decision keeps the schema flexible and avoids schema changes when new types appear.
+
+\item \textbf{Relationship Types:} Each extracted relation becomes an edge in the graph connecting two MedicalEntity nodes. We capitalize and possibly normalize the relation phrase to define the \textbf{relationship type}. For example, ``causes'' may become a \texttt{:CAUSES} relationship type in Neo4j. If a relation phrase is longer (more than one word), we either use it verbatim (spaces are allowed in Cypher if quoted) or convert to CamelCase or snake\_case (e.g. ``side effect of'' could be stored as \texttt{:SIDE\_EFFECT\_OF}). We compiled a list of relation types we expect from our model outputs. Many will be symmetric inverses (e.g. ``treats'' vs ``treated\_by''). We decided to store only one direction as the relation type that was extracted. In cases where the inverse makes sense, Neo4j can query the reverse direction without duplicating edges (by traversing in reverse). For instance, if we have \texttt{(:Drug)-[:TREATS]->(:Disease)}, we don't need a separate \texttt{:TREATED\_BY} edge, as the inverse can be inferred in queries. Thus, our relationship types are directed as per the text's implication. Some examples of relationship types in our schema:
+
+  \begin{itemize}
+  \item \texttt{CAUSES} – from condition to outcome (disease to complication).
+  \item \texttt{TREATS} – drug or procedure to condition.
+  \item \texttt{ASSOCIATED\_WITH} – a general link if model says ``X is associated with Y''.
+  \item \texttt{INDICATES} – symptom or test result indicating a condition.
+  \end{itemize}
+  
+  These are not fixed by the system initially; instead, they emerge from the model output. We then standardize them as needed. If synonyms appear (e.g. ``leads to'' vs ``causes''), we may choose to map them to one canonical relation type for consistency.
+
+\item \textbf{Graph Orientation and Context:} Each edge could also carry a \textbf{\texttt{context}} or \textbf{\texttt{source}} property indicating from which note (or sentence) it was derived. This is valuable if we want to trace back the provenance of a relationship. In our implementation, we include a property \texttt{note\_id} or \texttt{sentence\_id} on the relationship to record this. For example, \texttt{(Diabetes)-[CAUSES \{source:``Note42''\}]->(Neuropathy)} tells us that the relation was found in Note 42. This is useful for downstream validation or if we want to retrieve the original evidence for a given edge. We also considered temporal context (if notes have timestamps and the relation is time-bound) but our data does not deeply explore temporality, so we left that out of scope.
+\end{itemize}
+
+The resulting schema is a \textbf{property graph} schema common in biomedical KGs: a single dominant node type for concepts connected by various relation types. This design aligns with other healthcare knowledge graphs (e.g., HetioNet or OpenBioLink) which also have nodes for entities and typed edges for relationships, albeit those are often predefined by ontologies \parencite{Himmelstein2017}. In our case, the schema is partly \textit{emergent} (relation types come from text) and partly \textit{ontological} (node identities come from UMLS). By mapping to UMLS, we ensure the graph can be merged or aligned with existing knowledge sources. If needed, one could enrich this graph by pulling in more UMLS connections (like hierarchical relations ``isa'' between concepts), but our focus is on the information extracted directly from clinical narratives \parencite{Cowell2020}.
+
+In summary, the schema is designed to capture the essential pieces: \textbf{unique medical entities} (with their standard identifiers and categories) and \textbf{meaningful relationships} between them as observed in clinical text. It strikes a balance between specificity (not losing detail of relation phrases) and interoperability (using global IDs for concepts). This schema will support the queries and analyses described in later chapters, such as counting unique entities, listing all relations of a certain type, or measuring graph connectivity.
+
+\subsection{Cypher Query Generation and Storage}
+
+Once we have the schema and the list of nodes and relations (with their properties) ready, we proceed to create the knowledge graph in a Neo4j database. We use the Cypher query language for graph database operations, generating queries programmatically for each element. The process is as follows:
+
+\begin{itemize}
+\item \textbf{Node Merge Queries:} For each unique entity (identified by CUI) extracted from the notes, we generate a Cypher \texttt{MERGE} query to ensure a corresponding node exists in the database. We prefer \texttt{MERGE} over \texttt{CREATE} to avoid duplicate nodes, as the same entity may appear multiple times. For example, for a concept C0011849 (Diabetes Mellitus) with name ``Diabetes Mellitus'' and sem\_type ``Disease or Syndrome'', we produce:
+
+\begin{verbatim}
+MERGE (n:MedicalEntity {cui: "C0011849"})
+  ON CREATE SET n.name = "Diabetes Mellitus", 
+                n.sem_type = "Disease or Syndrome";
+\end{verbatim}
+
+  This query checks if a node with \texttt{cui} = C0011849 exists. If not, it creates one and sets its properties. If it exists, it leaves it as is (or we could optionally update the name to ensure consistency, but typically the first creation suffices). We do this for each distinct CUI from our list of entities. These queries are often batched for efficiency (we can combine multiple MERGEs in one transaction, or send them sequentially).
+
+\item \textbf{Relationship Creation Queries:} For each relationship triple (with source CUI, relation type, target CUI), we generate a \texttt{MERGE} or \texttt{CREATE} query for the edge. We use \texttt{MERGE} similarly to avoid duplicating the same edge if processed twice. However, we also include uniqueness by context if needed. The pattern looks like:
+
+\begin{verbatim}
+MATCH (a:MedicalEntity {cui:"C0011849"}), 
+      (b:MedicalEntity {cui:"C0031117"})
+MERGE (a)-[r:CAUSES]->(b)
+  ON CREATE SET r.source = "Note42"
+\end{verbatim}
+
+  This query first finds the two nodes by their CUIs (we assume they've been created by the previous step). Then it merges a \texttt{:CAUSES} relationship from the first to the second. If the relationship did not exist, it will be created and we set a property \texttt{source} to ``Note42'' (for example). If it already exists (meaning we encountered the same relation earlier, perhaps from another sentence or note), the \texttt{MERGE} will match it and do nothing else. One caveat: In Neo4j, \texttt{MERGE} on a relationship without specifying all properties could merge even if \textit{source} differs, which might or might not be desired. If we want multiple provenance, we might allow duplicates distinguished by \texttt{source}. In our case, we decide that the existence of an edge means the two concepts are related; we don't create duplicate edges for multiple notes, but we could append sources. (One could model sources as an array property or connect a \texttt{:Occurrence} node, but we keep it simple.)
+
+\item \textbf{Graph Storage:} The Neo4j database stores the resulting knowledge graph persistently. We verify the storage by running sample queries. For instance, after insertion, a query like:
+
+\begin{verbatim}
+MATCH (n:MedicalEntity)-[r]->(m:MedicalEntity) 
+RETURN n.name, type(r), m.name LIMIT 5;
+\end{verbatim}
+
+  would return some sample triples, confirming data presence. We also check that no unintended duplicates exist: e.g., each CUI yields exactly one node (we rely on the MERGE logic for that). The use of an \textbf{ACID transactional database} like Neo4j ensures that even if our batch insertion is interrupted, we won't end up with partial duplicates; the transactions handle consistency.
+\end{itemize}
+
+One benefit of using Neo4j and Cypher is the ability to later query complex patterns, such as \textit{``find all drugs that treat complications of diabetes''} in a relatively straightforward graph traversal query. The choice of Cypher is natural since Neo4j is one of the most popular graph databases, and it has been used in multiple healthcare knowledge graph projects for its robust query capabilities \parencite{Neo4j2023}. Neo4j's flexibility also means we could augment the graph with new node types or relationships easily if our schema evolves.
+
+Finally, it's worth noting that we considered the alternative of using a RDF triple store or an RDF representation (with entities as subjects/objects and relations as predicates). We opted for Neo4j's labeled property graph model for simplicity and familiarity. Our Cypher generation approach is straightforward, but it could be automated with an Object-Graph-Mapper or by using libraries like Py2neo or Neo4j's bulk import tool if scaling up. In this thesis context, generating explicit Cypher statements gave us fine control and transparency over the insertion process, which was helpful in debugging and verifying each step of the pipeline.
+
+By the end of this stage, the unstructured text has been fully transformed: we now have a \textbf{populated knowledge graph} where each node is a medical concept (with context from a clinical note) and each edge encodes a relationship that was described in the narrative. This graph is ready to be analyzed for insights, queried for specific patterns, and evaluated against our research questions (as will be done in subsequent chapters).
+
+\section{Implementation Optimization}
+\label{sec:optimization}
+
+\subsection{Parallel Processing and Resource Management}
+
+Building the pipeline in a Jupyter notebook environment (on Apple Silicon hardware) required careful optimization to handle the computational load of NLP tasks and large knowledge bases. We implemented several strategies to improve runtime and manage memory:
+
+\begin{itemize}
+\item \textbf{Parallel Processing:} Many steps of the pipeline can be executed in parallel, especially at the document level. Since processing each clinical note is mostly independent of others, we utilized parallelism to speed up the pipeline. In Python, this was achieved with multiprocessing pools or joblib to distribute the work across CPU cores. For example, we could spawn multiple worker processes, each handling a subset of the notes through the entire NER→Linking→Relation Extraction sequence. This led to near-linear scaling in throughput with the number of cores, up to the point where shared resource contention (like memory or disk I/O) kicked in. We had to be cautious with SciSpacy's UMLS linker in a multi-process setting; loading the 1GB knowledge base in each process is expensive. To mitigate that, we explored two approaches: (a) initialize the linker in the parent process and use threading (where memory is shared) instead of multiprocessing for that component, and (b) use fewer processes for the linking step while still parallelizing lightweight steps (like just NER). Ultimately, we found a balance by parallelizing at a coarse level – e.g., processing 3 notes concurrently – which improved speed without overwhelming the system \parencite{McKerns2021}.
+
+\item \textbf{Batching of Model Inference:} The GLiNER NER model and the LLM for relation extraction can potentially be run on batches of text rather than one document at a time. We took advantage of this for NER: combining a few notes together (if short) into one batch for the model significantly increased GPU/accelerator utilization. The HuggingFace transformer backend for GLiNER supports batching, so we used a batch size of 8 sentences per inference call, for instance. This means GLiNER would tokenize and run those sentences together through the model, amortizing the overhead. We ensured that this batching did not mix content from different notes in a way that confuses the model (each sentence in the batch is handled independently by the model, which is fine for NER). For the LLM (MedGemma/Gemma), batching is trickier because the prompt+output for each note is quite large and models like these typically don't support multi-prompt batching easily. Instead, we processed each note's relations sequentially for the LLM, which is a bottleneck. In future, an idea would be to use a smaller relation extraction model that could batch process multiple sentences, but given our use of a powerful but heavy LLM, we treated it as one-note-at-a-time. To compensate, we parallelized LLM calls across processes if possible (with caution to not overload memory).
+
+\item \textbf{Execution Mode – In-Notebook vs. External:} Running everything inside a Jupyter notebook has convenience but some limitations (as noted in Chapter 5.5). To optimize, one technique we used was to offload long-running tasks to external scripts when needed. For instance, heavy graph database insertion could be done via Neo4j's bulk import tool outside the notebook if performance became an issue. In our experiments, the dataset size was moderate enough to handle within the notebook by chunking work and using the above optimizations. We also scheduled certain long steps (like processing with the LLM) to run and save outputs (like triples) to disk so that if the kernel died or restarted (common with large memory tasks), we wouldn't lose all progress.
+\end{itemize}
+
+In essence, through parallelism we improved speed, and through careful memory management we averted crashes and slowdowns. The result is a pipeline that, while computationally intensive, is feasible to run in a research setting. For example, if a single note took $\sim$30 seconds for the LLM to process, processing 100 notes sequentially would be $\sim$50 minutes, but with 4 parallel workers, we brought that down significantly (plus GLiNER and linking are much faster, so the LLM was indeed the slowest part). By keeping an eye on resource usage (memory/CPU cores) and optimizing where possible, we ensure that the methodology is not just theoretically sound but also practically executable within our hardware and time constraints.
+
+Overall, the methodology chapter has described how each component of our system works and how they come together efficiently. In the subsequent chapters, we will assess how well this methodology performs, our results by comparing the chosen models, and discuss the implications of this approach in the healthcare context. The rigorous design and optimization steps we've undertaken here lay the groundwork for those analyses, and they contribute to the \textbf{novel pipeline} we developed for turning unstructured clinical text into an actionable knowledge graph.
