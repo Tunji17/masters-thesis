@@ -1,0 +1,499 @@
+==================================================
+
+Analyzing relation-specific performance...
+
+=== Relation-Specific Performance Analysis ===
+
+gemma_structured:
+  Association:
+    Precision: 0.0735
+    Recall: 0.0698
+    F1 Score: 0.0716
+    Predictions: 535, Ground Truth: 635
+  Bind:
+    Precision: 0.0357
+    Recall: 0.1429
+    F1 Score: 0.0571
+    Predictions: 28, Ground Truth: 9
+  Comparison:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 22, Ground Truth: 6
+  Conversion:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 12, Ground Truth: 1
+  Cotreatment:
+    Precision: 0.0769
+    Recall: 0.1429
+    F1 Score: 0.1000
+    Predictions: 26, Ground Truth: 14
+  Drug_Interaction:
+    Precision: 0.1538
+    Recall: 1.0000
+    F1 Score: 0.2667
+    Predictions: 13, Ground Truth: 2
+  Negative_Correlation:
+    Precision: 0.1000
+    Recall: 0.0427
+    F1 Score: 0.0598
+    Predictions: 70, Ground Truth: 171
+  Positive_Correlation:
+    Precision: 0.2178
+    Recall: 0.0775
+    F1 Score: 0.1143
+    Predictions: 101, Ground Truth: 325
+
+medgemma_structured:
+  Association:
+    Precision: 0.0588
+    Recall: 0.0448
+    F1 Score: 0.0508
+    Predictions: 433, Ground Truth: 635
+  Bind:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 5, Ground Truth: 9
+  Comparison:
+    Precision: 0.2500
+    Recall: 0.1667
+    F1 Score: 0.2000
+    Predictions: 4, Ground Truth: 6
+  Conversion:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 1
+  Cotreatment:
+    Precision: 0.1429
+    Recall: 0.0714
+    F1 Score: 0.0952
+    Predictions: 7, Ground Truth: 14
+  Drug_Interaction:
+    Precision: 0.2222
+    Recall: 1.0000
+    F1 Score: 0.3636
+    Predictions: 9, Ground Truth: 2
+  Negative_Correlation:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 41, Ground Truth: 171
+  Positive_Correlation:
+    Precision: 0.2647
+    Recall: 0.0634
+    F1 Score: 0.1023
+    Predictions: 68, Ground Truth: 325
+  Prevention:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  Reversal:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  associated with:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  include:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 6, Ground Truth: 0
+  induces:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  infected with:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  infects:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  protects:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  stimulates the production of:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+
+gemma_basic:
+  Alters:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  Association:
+    Precision: 0.0803
+    Recall: 0.0895
+    F1 Score: 0.0847
+    Predictions: 634, Ground Truth: 635
+  Bind:
+    Precision: 0.0500
+    Recall: 0.1429
+    F1 Score: 0.0741
+    Predictions: 22, Ground Truth: 9
+  Comparison:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 27, Ground Truth: 6
+  Confer:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  Conversion:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 11, Ground Truth: 1
+  Cotreatment:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 29, Ground Truth: 14
+  Disruption:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  Drug_Interaction:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 14, Ground Truth: 2
+  Negative_Correlation:
+    Precision: 0.0889
+    Recall: 0.0488
+    F1 Score: 0.0630
+    Predictions: 90, Ground Truth: 171
+  Positive_Correlation:
+    Precision: 0.1818
+    Recall: 0.0775
+    F1 Score: 0.1086
+    Predictions: 121, Ground Truth: 325
+  Recruits:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  SequenceVariant:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 3, Ground Truth: 0
+  Synthesizes:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  ameliorates:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  causes:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  reverses:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+
+medgemma_basic:
+  Association:
+    Precision: 0.0761
+    Recall: 0.0582
+    F1 Score: 0.0660
+    Predictions: 439, Ground Truth: 635
+  Bind:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 3, Ground Truth: 9
+  Comparison:
+    Precision: 1.0000
+    Recall: 0.1667
+    F1 Score: 0.2857
+    Predictions: 1, Ground Truth: 6
+  Conversion:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 1
+  Cotreatment:
+    Precision: 0.3333
+    Recall: 0.0714
+    F1 Score: 0.1176
+    Predictions: 3, Ground Truth: 14
+  Drug_Interaction:
+    Precision: 0.2000
+    Recall: 0.5000
+    F1 Score: 0.2857
+    Predictions: 5, Ground Truth: 2
+  Negative_Correlation:
+    Precision: 0.0769
+    Recall: 0.0122
+    F1 Score: 0.0211
+    Predictions: 26, Ground Truth: 171
+  Positive_Correlation:
+    Precision: 0.2885
+    Recall: 0.0528
+    F1 Score: 0.0893
+    Predictions: 52, Ground Truth: 325
+  associated_with:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 4, Ground Truth: 0
+  cotreatment:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  has_variant:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  is_a:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 5, Ground Truth: 0
+  protects:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  reverses:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  used_in:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+
+gemma_few_shot:
+  Association:
+    Precision: 0.0778
+    Recall: 0.0842
+    F1 Score: 0.0809
+    Predictions: 612, Ground Truth: 635
+  Bind:
+    Precision: 0.1333
+    Recall: 0.2857
+    F1 Score: 0.1818
+    Predictions: 15, Ground Truth: 9
+  Comparison:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 27, Ground Truth: 6
+  Conversion:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 8, Ground Truth: 1
+  Cotreatment:
+    Precision: 0.0333
+    Recall: 0.0714
+    F1 Score: 0.0455
+    Predictions: 30, Ground Truth: 14
+  Drug_Interaction:
+    Precision: 0.0500
+    Recall: 0.5000
+    F1 Score: 0.0909
+    Predictions: 20, Ground Truth: 2
+  Negative_Correlation:
+    Precision: 0.0926
+    Recall: 0.0610
+    F1 Score: 0.0735
+    Predictions: 108, Ground Truth: 171
+  Positive_Correlation:
+    Precision: 0.2374
+    Recall: 0.1162
+    F1 Score: 0.1560
+    Predictions: 139, Ground Truth: 325
+  Protection:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  Represses:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  Rescue:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  SequenceVariant:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 6, Ground Truth: 0
+  Synonym:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  Synthesis:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+
+medgemma_few_shot:
+  Association:
+    Precision: 0.0914
+    Recall: 0.0698
+    F1 Score: 0.0792
+    Predictions: 435, Ground Truth: 635
+  Bind:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 9
+  Comparison:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 0, Ground Truth: 6
+  Conversion:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 3, Ground Truth: 1
+  Cotreatment:
+    Precision: 0.1000
+    Recall: 0.0714
+    F1 Score: 0.0833
+    Predictions: 10, Ground Truth: 14
+  Drug_Interaction:
+    Precision: 0.0667
+    Recall: 0.5000
+    F1 Score: 0.1176
+    Predictions: 15, Ground Truth: 2
+  Negative_Correlation:
+    Precision: 0.0805
+    Recall: 0.0427
+    F1 Score: 0.0558
+    Predictions: 87, Ground Truth: 171
+  Positive_Correlation:
+    Precision: 0.1789
+    Recall: 0.0599
+    F1 Score: 0.0897
+    Predictions: 95, Ground Truth: 325
+  attenuates:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  binds to:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  competes with:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  decreased:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  decreases:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 5, Ground Truth: 0
+  destroys:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  impairs:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  improves:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  modulates:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  protective effect:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 2, Ground Truth: 0
+  protects:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 3, Ground Truth: 0
+  regulates:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 1, Ground Truth: 0
+  treatment:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Predictions: 3, Ground Truth: 0
+
+Generating evaluation report...
+Evaluation report saved to evaluation/results/gemma_evaluation/evaluation_report_20250715_011831.txt
+
+======================================================================
+EVALUATION SUMMARY
+======================================================================
+Model                           F1  Precision     Recall     Docs
+----------------------------------------------------------------------
+gemma_few_shot               0.082      0.082      0.082      100
+gemma_basic                  0.073      0.073      0.073      100
+medgemma_few_shot            0.070      0.087      0.059      100
+gemma_structured             0.069      0.075      0.065      100
+medgemma_basic               0.063      0.084      0.050      100
+medgemma_structured          0.053      0.068      0.043      100
+======================================================================
+
+Best performing model: gemma_few_shot (F1: 0.082)
+✗ Below minimum viable F1 score (< 0.40)
+
+==================================================
+Complete evaluation finished!

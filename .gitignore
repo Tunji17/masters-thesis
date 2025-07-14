@@ -1,6 +1,11 @@
+**__pycache__**
+*.pyc
 models/*/
 src/.venv
 src/data/*.txt
 paper/**/*.aux
 paper/main*
 research/*
+src/results/
+src/evaluation/results/
+src/evaluation/data/
