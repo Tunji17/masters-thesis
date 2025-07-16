@@ -1,0 +1,479 @@
+Initializing GLiNER Evaluation Framework...
+Dataset loaded:
+  Training: 400 documents
+  Development: 100 documents
+  Test: 100 documents
+
+Setting up model configurations...
+Model configurations added
+
+Starting evaluation...
+==================================================
+Starting GLiNER NER Evaluation
+Results will be saved in: evaluation/results/gliner_evaluation
+==================================================
+
+                                                                                                                                                                                    
+Evaluating gliner_biomed_default with exact matching...
+Models:   0%|                                                                                                                                              | 0/3 [00:00<?, ?model/s]Loading GLiNER model: Ihor/gliner-biomed-bi-large-v1.0
+Fetching 12 files: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 12/12 [00:00<00:00, 15382.53it/s]
+Model loaded successfully                                                                                                                                    | 0/12 [00:00<?, ?it/s]
+
+Processing 100 documents...
+                                                                                                                                                                                   Asking to truncate to max_length but no maximum length is provided and the model has no predefined maximum length. Default to no truncation.               | 0/100 [00:00<?, ?docs/s]
+Evaluating gliner_biomed_default: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:57<00:00,  1.17s/docs]
+✓ gliner_biomed_default (exact): F1=0.302, P=0.624, R=0.199                                                                                                                         
+Models:   0%|                                                                                                                                              | 0/3 [02:08<?, ?model/s]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_default:
+
+  CellLine:
+    Precision: 0.2143
+    Recall: 0.3000
+    F1 Score: 0.2500
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.7745
+    Recall: 0.2414
+    F1 Score: 0.3680
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.3355
+    Recall: 0.0556
+    F1 Score: 0.0954
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.7668
+    Recall: 0.3568
+    F1 Score: 0.4870
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.3182
+    Recall: 0.0712
+    F1 Score: 0.1164
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.2000
+    Recall: 0.0290
+    F1 Score: 0.0507
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_default_exact_results.json
+                                                                                                                                                                                    
+Evaluating gliner_biomed_default with partial matching...
+Models:   0%|                                                                                                                                              | 0/3 [02:08<?, ?model/s]
+Processing 100 documents...
+Evaluating gliner_biomed_default: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:56<00:00,  1.17s/docs]
+✓ gliner_biomed_default (partial): F1=0.336, P=0.694, R=0.221                                                                                                                       
+Models:   0%|                                                                                                                                              | 0/3 [04:04<?, ?model/s]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_default:
+
+  CellLine:
+    Precision: 0.2571
+    Recall: 0.3600
+    F1 Score: 0.3000
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.8255
+    Recall: 0.2573
+    F1 Score: 0.3923
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.4276
+    Recall: 0.0709
+    F1 Score: 0.1216
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.8543
+    Recall: 0.3975
+    F1 Score: 0.5425
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.3295
+    Recall: 0.0738
+    F1 Score: 0.1206
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.2286
+    Recall: 0.0332
+    F1 Score: 0.0580
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_default_partial_results.json
+                                                                                                                                                                                    
+Evaluating gliner_biomed_default with text matching...
+Models:   0%|                                                                                                                                              | 0/3 [04:04<?, ?model/s]
+Processing 100 documents...
+Evaluating gliner_biomed_default: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:53<00:00,  1.14s/docs]
+✓ gliner_biomed_default (text): F1=0.290, P=0.545, R=0.197                                                                                                                          
+Models:   0%|                                                                                                                                              | 0/3 [05:58<?, ?model/s]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_default:
+
+  CellLine:
+    Precision: 0.2571
+    Recall: 0.3600
+    F1 Score: 0.3000
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.8255
+    Recall: 0.2573
+    F1 Score: 0.3923
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.4276
+    Recall: 0.0709
+    F1 Score: 0.1216
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.8543
+    Recall: 0.3975
+    F1 Score: 0.5425
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.3295
+    Recall: 0.0738
+    F1 Score: 0.1206
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.2286
+    Recall: 0.0332
+    F1 Score: 0.0580
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_default_text_results.json
+                                                                                                                                                                                    
+Evaluating gliner_biomed_low_threshold with exact matching...
+Models:  33%|████████████████████████████████████████████▎                                                                                        | 1/3 [05:58<11:57, 358.51s/model]Loading GLiNER model: Ihor/gliner-biomed-bi-large-v1.0
+Fetching 12 files: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 12/12 [00:00<00:00, 8797.70it/s]
+Model loaded successfully                                                                                                                                    | 0/12 [00:00<?, ?it/s]
+
+Processing 100 documents...
+                                                                                                                                                                                   Asking to truncate to max_length but no maximum length is provided and the model has no predefined maximum length. Default to no truncation.               | 0/100 [00:00<?, ?docs/s]
+Evaluating gliner_biomed_low_threshold: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:50<00:00,  1.11s/docs]
+✓ gliner_biomed_low_threshold (exact): F1=0.400, P=0.555, R=0.313                                                                                                                   
+Models:  33%|████████████████████████████████████████████▎                                                                                        | 1/3 [07:58<11:57, 358.51s/model]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_low_threshold:
+
+  CellLine:
+    Precision: 0.1520
+    Recall: 0.3800
+    F1 Score: 0.2171
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.7266
+    Recall: 0.3700
+    F1 Score: 0.4903
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.3250
+    Recall: 0.1276
+    F1 Score: 0.1832
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.6964
+    Recall: 0.5288
+    F1 Score: 0.6012
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.3030
+    Recall: 0.1018
+    F1 Score: 0.1524
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.2796
+    Recall: 0.1079
+    F1 Score: 0.1557
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_low_threshold_exact_results.json
+                                                                                                                                                                                    
+Evaluating gliner_biomed_low_threshold with partial matching...
+Models:  33%|████████████████████████████████████████████▎                                                                                        | 1/3 [07:58<11:57, 358.51s/model]
+Processing 100 documents...
+Evaluating gliner_biomed_low_threshold: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:43<00:00,  1.04s/docs]
+✓ gliner_biomed_low_threshold (partial): F1=0.447, P=0.620, R=0.349                                                                                                                 
+Models:  33%|████████████████████████████████████████████▎                                                                                        | 1/3 [09:42<11:57, 358.51s/model]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_low_threshold:
+
+  CellLine:
+    Precision: 0.2000
+    Recall: 0.5000
+    F1 Score: 0.2857
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.7760
+    Recall: 0.3952
+    F1 Score: 0.5237
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.3944
+    Recall: 0.1549
+    F1 Score: 0.2224
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.7801
+    Recall: 0.5924
+    F1 Score: 0.6734
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.3106
+    Recall: 0.1043
+    F1 Score: 0.1562
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.3118
+    Recall: 0.1203
+    F1 Score: 0.1737
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_low_threshold_partial_results.json
+                                                                                                                                                                                    
+Evaluating gliner_biomed_low_threshold with text matching...
+Models:  33%|████████████████████████████████████████████▎                                                                                        | 1/3 [09:42<11:57, 358.51s/model]
+Processing 100 documents...
+Evaluating gliner_biomed_low_threshold: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:53<00:00,  1.14s/docs]
+✓ gliner_biomed_low_threshold (text): F1=0.385, P=0.470, R=0.326                                                                                                                    
+Models:  33%|████████████████████████████████████████████▎                                                                                        | 1/3 [11:36<11:57, 358.51s/model]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_low_threshold:
+
+  CellLine:
+    Precision: 0.2000
+    Recall: 0.5000
+    F1 Score: 0.2857
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.7760
+    Recall: 0.3952
+    F1 Score: 0.5237
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.3944
+    Recall: 0.1549
+    F1 Score: 0.2224
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.7801
+    Recall: 0.5924
+    F1 Score: 0.6734
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.3106
+    Recall: 0.1043
+    F1 Score: 0.1562
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.3118
+    Recall: 0.1203
+    F1 Score: 0.1737
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_low_threshold_text_results.json
+                                                                                                                                                                                    
+Evaluating gliner_biomed_high_threshold with exact matching...
+Models:  67%|████████████████████████████████████████████████████████████████████████████████████████▋                                            | 2/3 [11:36<05:46, 346.43s/model]Loading GLiNER model: Ihor/gliner-biomed-bi-large-v1.0
+Fetching 12 files: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 12/12 [00:00<00:00, 105517.08it/s]
+Model loaded successfully                                                                                                                                    | 0/12 [00:00<?, ?it/s]
+
+Processing 100 documents...
+                                                                                                                                                                                   Asking to truncate to max_length but no maximum length is provided and the model has no predefined maximum length. Default to no truncation.               | 0/100 [00:00<?, ?docs/s]
+Evaluating gliner_biomed_high_threshold: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:47<00:00,  1.08s/docs]
+✓ gliner_biomed_high_threshold (exact): F1=0.152, P=0.699, R=0.085                                                                                                                  
+Models:  67%|████████████████████████████████████████████████████████████████████████████████████████▋                                            | 2/3 [13:33<05:46, 346.43s/model]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_high_threshold:
+
+  CellLine:
+    Precision: 0.3158
+    Recall: 0.1200
+    F1 Score: 0.1739
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.8000
+    Recall: 0.1114
+    F1 Score: 0.1956
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.3750
+    Recall: 0.0098
+    F1 Score: 0.0191
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.8276
+    Recall: 0.1627
+    F1 Score: 0.2720
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.2683
+    Recall: 0.0280
+    F1 Score: 0.0507
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_high_threshold_exact_results.json
+                                                                                                                                                                                    
+Evaluating gliner_biomed_high_threshold with partial matching...
+Models:  67%|████████████████████████████████████████████████████████████████████████████████████████▋                                            | 2/3 [13:33<05:46, 346.43s/model]
+Processing 100 documents...
+Evaluating gliner_biomed_high_threshold: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:46<00:00,  1.07s/docs]
+✓ gliner_biomed_high_threshold (partial): F1=0.164, P=0.755, R=0.092                                                                                                                
+Models:  67%|████████████████████████████████████████████████████████████████████████████████████████▋                                            | 2/3 [15:19<05:46, 346.43s/model]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_high_threshold:
+
+  CellLine:
+    Precision: 0.3684
+    Recall: 0.1400
+    F1 Score: 0.2029
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.8571
+    Recall: 0.1194
+    F1 Score: 0.2095
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.4167
+    Recall: 0.0109
+    F1 Score: 0.0213
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.8966
+    Recall: 0.1763
+    F1 Score: 0.2946
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.2683
+    Recall: 0.0280
+    F1 Score: 0.0507
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_high_threshold_partial_results.json
+                                                                                                                                                                                    
+Evaluating gliner_biomed_high_threshold with text matching...
+Models:  67%|████████████████████████████████████████████████████████████████████████████████████████▋                                            | 2/3 [15:19<05:46, 346.43s/model]
+Processing 100 documents...
+Evaluating gliner_biomed_high_threshold: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [01:47<00:00,  1.08s/docs]
+✓ gliner_biomed_high_threshold (text): F1=0.146, P=0.654, R=0.082                                                                                                                   
+Models:  67%|████████████████████████████████████████████████████████████████████████████████████████▋                                            | 2/3 [17:07<05:46, 346.43s/model]
+=== Entity Type Performance Analysis ===
+
+gliner_biomed_high_threshold:
+
+  CellLine:
+    Precision: 0.3684
+    Recall: 0.1400
+    F1 Score: 0.2029
+    Support: 50
+
+  ChemicalEntity:
+    Precision: 0.8571
+    Recall: 0.1194
+    F1 Score: 0.2095
+    Support: 754
+
+  DiseaseOrPhenotypicFeature:
+    Precision: 0.4167
+    Recall: 0.0109
+    F1 Score: 0.0213
+    Support: 917
+
+  GeneOrGeneProduct:
+    Precision: 0.8966
+    Recall: 0.1763
+    F1 Score: 0.2946
+    Support: 1180
+
+  OrganismTaxon:
+    Precision: 0.2683
+    Recall: 0.0280
+    F1 Score: 0.0507
+    Support: 393
+
+  SequenceVariant:
+    Precision: 0.0000
+    Recall: 0.0000
+    F1 Score: 0.0000
+    Support: 241
+Results saved to evaluation/results/gliner_evaluation/gliner_biomed_high_threshold_text_results.json
+Models: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [17:07<00:00, 342.50s/model]
+
+==================================================
+
+Generating evaluation report...
+Evaluation report saved to evaluation/results/gliner_evaluation/evaluation_report_20250716_135722.txt
+
+================================================================================
+NER EVALUATION SUMMARY
+================================================================================
+Model                          Matching         F1  Precision     Recall
+--------------------------------------------------------------------------------
+gliner_biomed_low_threshold    partial       0.447      0.620      0.349
+gliner_biomed_low_threshold    exact         0.400      0.555      0.313
+gliner_biomed_low_threshold    text          0.385      0.470      0.326
+gliner_biomed_default          partial       0.336      0.694      0.221
+gliner_biomed_default          exact         0.302      0.624      0.199
+gliner_biomed_default          text          0.290      0.545      0.197
+gliner_biomed_high_threshold   partial       0.164      0.755      0.092
+gliner_biomed_high_threshold   exact         0.152      0.699      0.085
+gliner_biomed_high_threshold   text          0.146      0.654      0.082
+================================================================================
+
+Best performing configuration: gliner_biomed_low_threshold (partial matching)
+F1 Score: 0.447
+
+==================================================
+Complete evaluation finished!
+Results saved in: evaluation/results/gliner_evaluation
