@@ -1,0 +1,188 @@
+% Chapter 4
+
+\chapter{Results, Evaluation and Discussion} % Main chapter title
+
+\label{Chapter4} % For referencing the chapter elsewhere, use \ref{Chapter4} 
+
+%----------------------------------------------------------------------------------------
+
+This chapter presents a comprehensive evaluation of the multi-model biomedical information extraction pipeline developed in this thesis. We evaluate each component systematically: named entity recognition using GLiNER, relationship extraction comparing Gemma and MedGemma models, and the end-to-end pipeline performance for knowledge graph construction. The evaluation is conducted on the BioRED dataset, providing gold-standard annotations for both entity recognition and relationship extraction tasks. Our findings reveal significant challenges in biomedical relationship extraction while demonstrating the potential of multi-model approaches for transforming unstructured biomedical text into structured knowledge graphs.
+
+%----------------------------------------------------------------------------------------
+
+\section{Experimental Setup}
+
+\subsection{BioRED Dataset and Evaluation Metrics}
+
+Our evaluation is conducted on the \textbf{BioRED dataset}, a comprehensive corpus specifically designed for biomedical relation extraction evaluation. BioRED contains manually annotated PubMed abstracts covering diverse biomedical research areas with multiple entity types and relationship annotations. The dataset provides a robust foundation for evaluating our multi-model pipeline's performance across different biomedical text processing tasks.
+
+\textbf{Dataset Statistics:} The BioRED dataset consists of 6,000 documents split across three sets: 400 training documents, 100 development documents, and 100 test documents. For our evaluation, we focus primarily on the test set to provide unbiased performance assessment. The dataset contains over 30,000 entity mentions across six entity types: GeneOrGeneProduct, DiseaseOrPhenotypicFeature, ChemicalEntity, SequenceVariant, CellLine, and OrganismTaxon. Additionally, it includes approximately 6,000 relationship annotations spanning eight relation types: Association, Positive\_Correlation, Negative\_Correlation, Bind, Comparison, Cotreatment, Drug\_Interaction, and Conversion.
+
+\textbf{Evaluation Metrics:} We employ standard information extraction evaluation metrics to assess pipeline performance. For named entity recognition, we calculate \textbf{precision}, \textbf{recall}, and \textbf{F1 score} using three matching strategies: exact matching (requiring precise boundary alignment), partial matching (allowing overlapping boundaries), and text-based matching (focusing on entity surface forms). For relationship extraction, we use precision, recall, and F1 score at the relation level, where a prediction is considered correct only if both entities and the relation type match the gold standard.
+
+The choice of BioRED enables direct comparison with existing biomedical NLP systems and provides realistic evaluation conditions. The dataset's annotation quality and comprehensive coverage of biomedical relationships make it particularly suitable for evaluating knowledge graph construction pipelines. Our evaluation framework systematically measures each pipeline component's contribution to overall system performance, enabling identification of bottlenecks and optimization opportunities.
+
+\subsection{Model Configurations and Prompt Strategies}
+
+Our experimental setup evaluates multiple model configurations to understand the impact of domain specialization and prompt engineering on biomedical information extraction performance. We configure the pipeline to test different approaches systematically while maintaining consistent preprocessing and evaluation procedures.
+
+\textbf{Named Entity Recognition Configuration:} We employ the GLiNER-BioMed model (Ihor/gliner-biomed-bi-large-v1.0) for named entity recognition, configured with three different confidence thresholds to analyze precision-recall trade-offs. The \textbf{default threshold} (0.5) represents standard model operation, the \textbf{low threshold} (0.3) maximizes recall by accepting more tentative predictions, and the \textbf{high threshold} (0.7) prioritizes precision by filtering uncertain predictions. This threshold analysis reveals the model's calibration and optimal operating points for different application scenarios.
+
+\textbf{Relationship Extraction Model Variants:} We evaluate six different configurations combining two base models with three prompt strategies. The base models are \textbf{Gemma-3-4b-it} (general-purpose instruction-tuned model) and \textbf{MedGemma-3-4b} (medical domain-specialized variant). For each model, we test three prompt strategies:
+
+\begin{itemize}
+\item \textbf{Basic Prompting:} Simple task description requesting relationship extraction without examples or structured formatting guidance.
+\item \textbf{Few-shot Prompting:} Includes 2-3 demonstration examples showing desired input-output format and relationship types.
+\item \textbf{Structured Prompting:} Detailed instructions with explicit output formatting requirements, entity type constraints, and relationship category guidelines.
+\end{itemize}
+
+This configuration matrix allows systematic comparison of domain specialization effects (Gemma vs MedGemma) and prompt engineering impact (basic vs few-shot vs structured). The experimental design isolates these factors while maintaining consistent evaluation conditions, enabling reliable performance attribution to specific design choices.
+
+\textbf{Evaluation Protocol:} Each model configuration processes the same BioRED test set under identical conditions. We record computational requirements (inference time, memory usage) alongside accuracy metrics to assess practical deployment feasibility. The evaluation framework captures both component-level performance (NER accuracy, relation extraction F1) and end-to-end pipeline effectiveness (knowledge graph completeness, entity linking success rates). This comprehensive evaluation approach provides insights into real-world system behavior beyond isolated component performance.
+
+%----------------------------------------------------------------------------------------
+
+\section{Named Entity Recognition Performance}
+
+\subsection{GLiNER Results: Threshold Impact and Matching Strategies}
+
+The GLiNER-BioMed model demonstrates varying performance characteristics across different confidence thresholds and matching criteria, revealing important trade-offs between precision and recall in biomedical named entity recognition. Our systematic evaluation across three threshold settings provides insights into optimal model configuration for different application requirements.
+
+\textbf{Default Threshold Performance (0.5):} At the default threshold, GLiNER-BioMed achieves moderate precision with limited recall across all matching strategies. With \textbf{exact matching}, the model attains 62.36\% precision but only 19.92\% recall, resulting in an F1 score of 30.19\%. This indicates that while the model's predictions are reasonably accurate, it misses a significant portion of true entities. The \textbf{partial matching} strategy shows improvement with 69.35\% precision and 22.15\% recall (F1: 33.58\%), suggesting that many model predictions have correct entity boundaries but differ slightly from gold standard annotations. Interestingly, \textbf{text-based matching} shows reduced performance (54.52\% precision, 19.73\% recall, F1: 28.97\%), indicating that surface form matching introduces additional complexity.
+
+\textbf{Low Threshold Impact (0.3):} Reducing the confidence threshold to 0.3 significantly improves recall at the cost of precision, as expected. Exact matching achieves 55.53\% precision and 31.26\% recall (F1: 40.00\%), representing a substantial recall improvement of over 10 percentage points. Partial matching reaches 62.01\% precision with 34.91\% recall (F1: 44.67\%), the highest F1 score achieved in our evaluation. This suggests that lowering the threshold captures more true entities while maintaining reasonable prediction quality. The text-based matching continues to show challenges with 47.04\% precision and 32.56\% recall (F1: 38.48\%).
+
+\textbf{High Threshold Conservative Approach (0.7):} The high threshold configuration prioritizes precision over recall, achieving 69.91\% precision but only 8.54\% recall for exact matching (F1: 15.23\%). While this configuration produces highly confident predictions, it misses the majority of entities, making it unsuitable for comprehensive knowledge extraction. Partial matching slightly improves recall to 9.22\% while maintaining 75.46\% precision (F1: 16.44\%), but the overall performance remains limited for practical applications.
+
+These results demonstrate that GLiNER-BioMed exhibits \textbf{conservative behavior} in biomedical entity recognition, preferring high-confidence predictions over comprehensive coverage. The optimal threshold depends on application requirements: clinical decision support systems might prefer high precision (threshold 0.7), while knowledge discovery applications benefit from balanced performance (threshold 0.3-0.4). The consistent performance gap between partial and exact matching suggests that boundary detection remains challenging, possibly due to variations in annotation standards or entity mention complexity.
+
+\textbf{Comprehensive Performance Summary:} Table~\ref{tab:ner_evaluation_summary} presents the complete NER evaluation results across all model configurations and matching strategies, ordered by F1 score performance. The results clearly demonstrate the performance hierarchy among different threshold settings and matching approaches.
+
+\begin{table}[htbp]
+\centering
+\caption{NER Evaluation Summary - GLiNER-BioMed Performance Across Configurations}
+\label{tab:ner_evaluation_summary}
+\begin{tabular}{lllll}
+\toprule
+\textbf{Model} & \textbf{Matching} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
+\midrule
+gliner\_biomed\_low\_threshold & partial & 0.447 & 0.620 & 0.349 \\
+gliner\_biomed\_low\_threshold & exact & 0.400 & 0.555 & 0.313 \\
+gliner\_biomed\_low\_threshold & text & 0.385 & 0.470 & 0.326 \\
+gliner\_biomed\_default & partial & 0.336 & 0.694 & 0.221 \\
+gliner\_biomed\_default & exact & 0.302 & 0.624 & 0.199 \\
+gliner\_biomed\_default & text & 0.290 & 0.545 & 0.197 \\
+gliner\_biomed\_high\_threshold & partial & 0.164 & 0.755 & 0.092 \\
+gliner\_biomed\_high\_threshold & exact & 0.152 & 0.699 & 0.085 \\
+gliner\_biomed\_high\_threshold & text & 0.146 & 0.654 & 0.082 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The table confirms that the \textbf{gliner\_biomed\_low\_threshold} configuration with partial matching achieves the best overall performance (F1: 0.447), representing the optimal balance between precision (0.620) and recall (0.349) for comprehensive biomedical entity extraction. This configuration should be recommended for applications prioritizing entity coverage over ultra-high precision.
+
+\subsection{Error Analysis and Entity Boundary Challenges}
+
+Detailed error analysis reveals systematic patterns in GLiNER-BioMed's prediction failures, providing insights into biomedical NER challenges and potential improvement directions. The analysis examines false positives, false negatives, and boundary detection issues across different entity types and text contexts.
+
+\textbf{Boundary Detection Issues:} The performance difference between partial and exact matching (approximately 3-4 F1 points) indicates systematic boundary detection challenges. Common patterns include: \textbf{abbreviated forms} where the model predicts "TNF" but the gold standard annotates "TNF-$\alpha$", \textbf{compound terms} where predictions capture partial phrases (e.g., "heart failure" vs "congestive heart failure"), and \textbf{modifier inclusion} where clinical context affects boundary determination (e.g., "severe diabetes" vs "diabetes"). These boundary issues particularly affect ChemicalEntity and DiseaseOrPhenotypicFeature categories, which often involve complex terminological variations.
+
+\textbf{Entity Type Distribution:} Different entity types show varying recognition success rates. GeneOrGeneProduct entities typically achieve higher precision due to standardized naming conventions (e.g., "BRCA1", "p53"), while DiseaseOrPhenotypicFeature entities show more variability due to descriptive terminology and synonym usage. ChemicalEntity recognition faces challenges with drug names, chemical compounds, and dosage expressions that may include numerical values and units. SequenceVariant entities present particular difficulties due to specialized notation (e.g., "V244M", "c.1234G>A") that requires domain-specific understanding.
+
+\textbf{Context Sensitivity:} Error analysis reveals that GLiNER-BioMed struggles with context-dependent entity recognition. Ambiguous terms like "cold" (temperature vs. common cold), "culture" (cell culture vs. bacterial culture), or "positive" (test result vs. correlation direction) require surrounding context for correct classification. The model shows limited ability to leverage sentence-level context for disambiguation, suggesting potential improvements through context-aware training or post-processing rules.
+
+\textbf{Recall Limitations:} The consistently low recall (20-35\%) across threshold settings indicates that GLiNER-BioMed misses many true entities, particularly less common terms, newly coined expressions, and entities expressed through paraphrasing rather than standard terminology. This limitation significantly impacts downstream relationship extraction and knowledge graph completeness, as missing entities cannot participate in extracted relationships. The recall limitation represents a critical bottleneck for comprehensive biomedical knowledge extraction applications.
+
+These error patterns highlight the complexity of biomedical entity recognition and the need for domain-specific improvements. While GLiNER-BioMed demonstrates reasonable precision for confident predictions, the recall limitations and boundary detection challenges suggest that combining multiple NER approaches or implementing post-processing refinements could improve overall pipeline performance.
+
+%----------------------------------------------------------------------------------------
+
+\section{Relationship Extraction Performance}
+
+\subsection{Gemma vs MedGemma: Strategy Comparison and Low F1 Analysis}
+
+The relationship extraction evaluation reveals significant performance challenges across all model configurations, with F1 scores consistently below 10\% indicating fundamental difficulties in biomedical relationship extraction from unstructured text. Despite these low absolute scores, meaningful differences emerge between general and domain-specific models, providing insights into the value of medical specialization.
+
+\textbf{Model Comparison Overview:} Across all prompt strategies, standard Gemma models consistently outperform their MedGemma counterparts, contradicting initial expectations that domain specialization would improve biomedical relationship extraction. The \textbf{Gemma few-shot} configuration achieves the highest performance with 8.18\% precision, 8.20\% recall, and 8.19\% F1 score, compared to the best MedGemma configuration (few-shot) achieving 8.70\% precision, 5.90\% recall, and 7.03\% F1 score. This pattern holds across all three prompt strategies, suggesting that general language understanding may be more valuable than domain-specific training for this particular relationship extraction task.
+
+\textbf{Precision vs Recall Trade-offs:} The results reveal distinct behavioral patterns between model types. MedGemma variants tend to achieve higher precision but significantly lower recall, indicating more conservative prediction behavior. For example, MedGemma structured achieves 6.81\% precision compared to Gemma structured's 7.51\%, but MedGemma's recall drops to 4.29\% versus Gemma's 6.46\%. This suggests that medical domain training may lead to overly cautious relationship prediction, missing many true relationships while maintaining reasonable prediction accuracy for identified relationships.
+
+\textbf{Prompt Strategy Effects:} Few-shot prompting consistently produces the best results across both model families, indicating that demonstration examples effectively guide model behavior for relationship extraction. Basic prompting achieves moderate performance, suggesting that even simple task descriptions enable reasonable relationship extraction. Structured prompting unexpectedly produces the lowest performance across both model families, potentially due to overly rigid constraints that limit the models' natural language understanding capabilities.
+
+\textbf{Performance Analysis:} The consistently low F1 scores (5-8\%) across all configurations indicate that biomedical relationship extraction remains a challenging task even for large language models. Several factors contribute to these difficulties: \textbf{annotation complexity} where gold-standard relationships require deep biomedical understanding, \textbf{implicit relationships} that are not explicitly stated in text, \textbf{entity linking dependencies} where incorrect entity recognition propagates to relationship extraction errors, and \textbf{relationship type ambiguity} where similar semantic relationships map to different gold standard categories.
+
+The superior performance of general Gemma models suggests that broader language understanding and reasoning capabilities may be more important than domain-specific medical knowledge for relationship extraction tasks. This finding challenges assumptions about domain specialization benefits and suggests that scaling general capabilities might be more effective than narrow domain tuning for complex biomedical NLP tasks.
+
+\textbf{Comprehensive Performance Comparison:} Table~\ref{tab:relation_extraction_summary} presents the complete relationship extraction evaluation results across all model configurations and prompt strategies, ordered by F1 score performance. The results demonstrate the clear performance hierarchy among different model-prompt combinations.
+
+\begin{table}[htbp]
+\centering
+\caption{Relationship Extraction Evaluation Summary - Gemma vs MedGemma Performance}
+\label{tab:relation_extraction_summary}
+\begin{tabular}{llllr}
+\toprule
+\textbf{Model} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} & \textbf{Docs} \\
+\midrule
+gemma\_few\_shot & 0.082 & 0.082 & 0.082 & 100 \\
+gemma\_basic & 0.073 & 0.073 & 0.073 & 100 \\
+medgemma\_few\_shot & 0.070 & 0.087 & 0.059 & 100 \\
+gemma\_structured & 0.069 & 0.075 & 0.065 & 100 \\
+medgemma\_basic & 0.063 & 0.084 & 0.050 & 100 \\
+medgemma\_structured & 0.053 & 0.068 & 0.043 & 100 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The evaluation confirms that \textbf{gemma\_few\_shot} achieves the best overall performance (F1: 0.082) among all configurations tested. However, all models fall significantly below the minimum viable F1 score threshold of 0.40, highlighting the fundamental challenges in biomedical relationship extraction. The consistent pattern of Gemma models outperforming MedGemma variants across all prompt strategies reinforces the finding that general language capabilities may be more valuable than domain-specific medical training for this complex task.
+
+\subsection{Model Limitations and Output Quality Issues}
+
+Detailed analysis of model outputs reveals systematic limitations that explain the low F1 scores and highlight areas requiring improvement for practical biomedical relationship extraction applications. These limitations span output formatting, relationship identification accuracy, and adherence to task constraints.
+
+\textbf{Output Formatting Challenges:} Both Gemma and MedGemma models struggle with consistent output formatting despite explicit instructions. Common issues include \textbf{malformed triples} where models produce incomplete or incorrectly structured relationships (e.g., missing entities or relation types), \textbf{entity naming inconsistencies} where models use variations of entity names not matching input text exactly, and \textbf{extraneous content} where models include explanatory text or reasoning alongside requested triple outputs. These formatting issues require substantial post-processing and reduce the reliability of automated knowledge extraction.
+
+\textbf{Hallucination and Inference Issues:} Large language models demonstrate tendency to infer relationships not explicitly stated in the text, creating both opportunities and challenges for biomedical knowledge extraction. While some inferences reflect valid biomedical knowledge (e.g., inferring that a drug treats a condition when the text mentions prescription context), others introduce errors through incorrect assumptions or over-generalization. MedGemma models show slightly higher rates of medically plausible but textually unsupported inferences, suggesting that domain knowledge can lead to hallucination problems in structured extraction tasks.
+
+\textbf{Relationship Type Granularity:} The BioRED dataset defines specific relationship types (Association, Positive\_Correlation, Negative\_Correlation, etc.) that require precise semantic distinction. Models frequently confuse similar relationship types, particularly between "Association" and "Positive\_Correlation" or between "Cotreatment" and "Drug\_Interaction." This granularity challenge reflects the difficulty of mapping natural language expressions to formal relationship taxonomies, a key challenge for automated knowledge base construction.
+
+\textbf{Entity Alignment Problems:} Relationship extraction accuracy depends critically on correct entity identification and alignment. Models often predict relationships using entity phrasings that differ from NER outputs, creating alignment challenges during knowledge graph construction. For example, if NER identifies "diabetes mellitus" but the relationship extractor outputs "diabetes," post-processing must resolve this discrepancy or risk losing the relationship. This entity alignment problem compounds errors from both NER and relationship extraction stages.
+
+\textbf{Repetition and Redundancy:} Models occasionally produce duplicate or near-duplicate relationships, particularly when processing longer texts with multiple entity mentions. This redundancy creates noise in extracted knowledge and requires deduplication procedures that may inadvertently remove valid relationships between recurring entities. The repetition issue appears more pronounced in basic prompting conditions, suggesting that structured guidance helps maintain output quality.
+
+\textbf{Model Size Constraints:} A significant limitation of our evaluation is the use of relatively small 4B parameter models (Gemma and MedGemma), which may contribute to the low F1 scores observed. The original BioRED paper reports much higher performance using larger models and specialized architectures, with state-of-the-art systems achieving F1 scores above 40\% compared to our 5-8\%. While 4B parameter models offer practical advantages for deployment (lower memory requirements, faster inference), they may lack the capacity to capture the complex patterns necessary for accurate biomedical relationship extraction. Larger models (70B+ parameters) or models specifically fine-tuned on biomedical relation extraction tasks would likely achieve substantially better performance, suggesting that model scale remains a critical factor for this challenging task.
+
+These output quality issues highlight the gap between large language model capabilities and the precision requirements of structured knowledge extraction. While models demonstrate impressive language understanding, the systematic formatting and accuracy challenges indicate that relationship extraction for knowledge graph construction requires specialized approaches beyond standard language modeling techniques. The findings suggest that hybrid approaches combining language models with rule-based post-processing or specialized training objectives might be necessary for practical biomedical relationship extraction applications.
+
+%----------------------------------------------------------------------------------------
+
+\section{End-to-End Pipeline Evaluation}
+
+\subsection{Processing Efficiency and Scalability}
+
+The pipeline's computational performance and scalability characteristics determine practical deployment feasibility for large-scale biomedical text processing applications. Our evaluation assesses processing times, resource requirements, and scalability bottlenecks across pipeline components.
+
+\textbf{Component-Level Performance:} Processing times vary significantly across pipeline stages, with relationship extraction representing the primary computational bottleneck. \textbf{GLiNER NER} processes documents efficiently at approximately 2-5 seconds per abstract on Apple Silicon hardware, depending on text length and entity density. \textbf{SciSpacy entity linking} adds minimal overhead (0.5-1 second per document) due to efficient TF-IDF similarity computation and optimized UMLS index structures. \textbf{Large language model inference} dominates processing time, requiring 15-45 seconds per document depending on model size, prompt complexity, and generated output length.
+
+\textbf{Memory Requirements:} The pipeline's memory footprint reflects the size of loaded models and knowledge bases. GLiNER requires approximately 2-3 GB of GPU memory when loaded, while SciSpacy's UMLS linker consumes 1-2 GB of RAM for knowledge base indexing. Large language models (Gemma/MedGemma 4B parameters) require 8-12 GB of GPU memory for efficient inference, representing the largest memory demand. Total system memory requirements range from 12-18 GB for optimal performance, limiting deployment to well-equipped hardware configurations.
+
+\textbf{Scalability Analysis:} Linear scaling analysis reveals that processing 100 BioRED documents requires approximately 160-180 minutes depending on model configuration and hardware specifications. This suggests that large-scale processing (e.g., entire PubMed subsets) would require distributed computing approaches or specialized optimization strategies. The relationship extraction stage's computational intensity creates a significant scalability bottleneck that would need addressing for production deployment.
+
+\textbf{Optimization Opportunities:} Several optimization strategies could improve pipeline efficiency: \textbf{model quantization} to reduce memory requirements and inference time, \textbf{batch processing} to amortize model loading overhead across multiple documents, \textbf{distributed processing} to parallelize document-level computation, and \textbf{selective processing} to apply expensive models only to high-value content sections. The modular pipeline architecture facilitates such optimizations without requiring fundamental redesign.
+
+\textbf{Deployment Considerations:} Practical deployment requires balancing accuracy requirements with computational constraints. High-throughput applications might benefit from faster but less accurate models or simplified relationship extraction approaches. Research applications requiring comprehensive extraction might justify longer processing times for improved coverage and accuracy. The pipeline's flexibility allows configuration optimization based on specific deployment requirements and available computational resources.
+
+%----------------------------------------------------------------------------------------
+
+\section{Discussion}
+
+\subsection{Key Findings and Clinical Applicability}
+
+The comprehensive evaluation of our multi-model biomedical information extraction pipeline reveals both promising capabilities and significant challenges for transforming unstructured biomedical text into actionable knowledge graphs. The findings provide important insights into current limitations and future directions for biomedical NLP applications.
+
+\textbf{Performance Summary and Implications:} The evaluation demonstrates that while individual pipeline components show reasonable performance for model size in isolation, the end-to-end system faces substantial challenges in comprehensive knowledge extraction. GLiNER-BioMed achieves moderate precision (55-70\%) but limited recall (20-35\%) for named entity recognition, while relationship extraction remains particularly challenging with F1 scores below 10\% across all model configurations. These results indicate that current approaches, while technically feasible, require significant model improvement before deployment in critical clinical applications.
+
+\textbf{Domain Specialization Insights:} The unexpected finding that general Gemma models outperform domain-specific MedGemma variants challenges assumptions about the value of medical specialization for relationship extraction tasks. This suggests that broad language understanding and reasoning capabilities may be more important than domain-specific training for complex biomedical relationship identification. However, the overall low performance across both model types indicates that relationship extraction remains fundamentally challenging regardless of domain specialization approach.
+
+\textbf{Clinical Applicability Assessment:} The current pipeline performance limits immediate clinical applicability, particularly for applications requiring comprehensive knowledge extraction or high recall. However, specific use cases might benefit from the high-precision, low-recall characteristics observed in our evaluation. \textbf{Literature screening} applications could leverage the pipeline's ability to identify high-confidence relationships for initial filtering, reducing manual review requirements. \textbf{Knowledge base enrichment} could benefit from the pipeline's entity linking capabilities and standardized concept identification, even with incomplete relationship extraction. \textbf{Hypothesis generation} might utilize extracted relationships as starting points for deeper investigation, accepting lower recall in exchange for automated processing capabilities.
+
+\textbf{Technical Architecture Strengths:} Despite performance limitations, the multi-model pipeline architecture demonstrates several advantages. The \textbf{modular design} enables independent optimization of each component and facilitates integration of improved models as they become available. The \textbf{UMLS integration} provides interoperability with existing medical knowledge bases and standards. The \textbf{flexible configuration} options allow adaptation to different accuracy-efficiency trade-offs based on application requirements. These architectural strengths suggest that the framework provides a solid foundation for future improvements.
