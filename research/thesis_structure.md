@@ -98,7 +98,42 @@
   - 5.3.3 Scaling to Larger Clinical Corpora
 - 5.4 Final Remarks
 
-## Back Matter (preserved)
+## Back Matter
 
 - Bibliography
-- Appendices
+
+## Appendices
+
+### Appendix A: Comprehensive Evaluation Results and Statistical Analysis
+- Complete BioRED evaluation matrices for all 15 model configurations
+- GLiNER threshold sensitivity analysis (0.3, 0.5, 0.7 confidence levels)
+- Matching strategy performance comparison (exact, partial, text-based)
+- Per-relation-type performance breakdowns across 8 BioRED relation types
+- Statistical significance tests for Gemma vs MedGemma comparisons
+- Entity-specific NER performance across 6 biomedical entity types
+- Computational benchmarks (processing times, memory usage, scalability metrics)
+- Precision-recall curves and confusion matrices for all model variants
+
+### Appendix B: Technical Implementation and Reproducibility Guide
+- Complete prompt templates for all three relationship extraction strategies
+  - Basic prompting approach with system instructions
+  - Few-shot prompting with biomedical examples
+  - Structured JSON output prompting with schema validation
+- Detailed UMLS entity linking configuration and threshold selection rationale
+- Neo4j schema definitions with complete Cypher query templates
+- GLiNER biomedical model configuration and optimization parameters
+- Error handling algorithms and post-processing pipeline specifics
+- Parallel processing implementation and resource optimization strategies
+- Hardware requirements and deployment configuration details
+- Data preprocessing pipeline with text cleaning and normalization steps
+
+### Appendix C: Error Analysis and Failure Case Studies
+- Comprehensive analysis of relationship extraction failures (90%+ missed relationships)
+- Categorized entity boundary detection errors by biomedical entity type
+- Model hallucination examples and systematic error pattern identification
+- Prompt strategy effectiveness analysis across different biomedical text structures
+- Entity alignment issues between NER and relationship extraction components
+- Case studies comparing complete pipeline failures vs. successful extractions
+- Relationship type confusion analysis (ground truth vs. model predictions)
+- Domain-specific model underperformance investigation (MedGemma vs Gemma)
+- Specific recommendations for addressing identified systematic error patterns

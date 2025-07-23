@@ -1,0 +1,52 @@
+% Chapter 5
+
+\chapter{Conclusions and Future Work} % Main chapter title
+
+\label{Chapter5} % For referencing the chapter elsewhere, use \ref{Chapter5} 
+
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
+
+This thesis presented a comprehensive multi-model approach for transforming unstructured biomedical text into actionable knowledge graphs through the integration of named entity recognition, entity linking, relationship extraction, and graph construction techniques. This final chapter summarizes the key contributions of this work and outlines promising directions for future research.
+
+%----------------------------------------------------------------------------------------
+
+\section{Summary of Contributions}
+
+\subsection{Technical Contributions}
+
+\textbf{Multi-Model Pipeline Architecture:} Developed an end-to-end pipeline integrating GLiNER for named entity recognition, SciSpacy's UMLS linking for entity normalization, and large language models (Gemma/MedGemma) for relationship extraction with modular architecture for flexible component substitution.
+
+\textbf{Prompt Engineering for Relationship Extraction:} Developed and evaluated multiple prompting strategies for biomedical relationship extraction, comparing Gemma vs. MedGemma configurations to identify effective approaches for semantic relationship extraction.
+
+\textbf{Scalable Graph Construction:} Implemented efficient Cypher query generation and batch processing for Neo4j knowledge graphs with parallel processing and resource management optimizations for large-scale biomedical document processing.
+
+\textbf{Comprehensive Evaluation Framework:} Established evaluation methodology using BioRED dataset with multiple matching strategies (exact, partial, text-based) and metrics for pipeline component assessment.
+
+\subsection{Theoretical Contributions}
+
+\textbf{Model Specialization Analysis:} Comparison between Gemma and MedGemma revealed that domain specialization does not automatically improve performance in complex relationship extraction tasks, with implications for specialized biomedical language model development.
+
+\textbf{Knowledge Graph Integration Paradigm:} Demonstrated effective structuring and querying of extracted biomedical knowledge within graph databases, providing a foundation for biomedical knowledge discovery and reasoning systems.
+
+%----------------------------------------------------------------------------------------
+
+\section{Future Research Directions}
+
+Based on the findings and limitations identified in this thesis, several promising avenues for future research emerge:
+
+\subsection{Model Scale Improvements}
+
+The most significant opportunity for performance improvement lies in scaling up the models throughout the pipeline. Our evaluation demonstrated limited relationship extraction performance with Gemma3-4B and MedGemma3-4B models, suggesting that deploying larger language models (70B+ parameters) would likely yield substantial improvements in F1 scores due to their superior reasoning capabilities and biomedical knowledge understanding.
+
+\subsection{Expanding Beyond UMLS to Other Medical Knowledge Bases}
+
+Future work should explore integrating multiple biomedical ontologies simultaneously, including Gene Ontology (GO), Chemical Entities of Biological Interest (ChEBI), and Human Phenotype Ontology (HPO), to provide richer semantic annotations and enable cross-ontology relationship discovery that could reveal novel connections between different biomedical entity types.
+
+%----------------------------------------------------------------------------------------
+
+\section{Final Remarks}
+
+While we successfully developed an end-to-end system integrating state-of-the-art NLP techniques, significant obstacles remain in achieving high-quality biomedical information extraction, particularly in relationship extraction performance. The modular architecture provides a platform for incorporating future advances as the field rapidly evolves.
