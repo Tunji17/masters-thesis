@@ -14,6 +14,40 @@ This chapter details the multi-model methodology for transforming unstructured b
 
 The proposed system follows a modular pipeline architecture, where each stage transforms the biomedical text and feeds into the next stage. The architecture consists of the following major components and data flow:
 
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=5.5cm,
+    every node/.style={align=center},
+    block/.style={rectangle, draw=black!70, fill=blue!20, minimum width=3cm, minimum height=1cm, font=\footnotesize},
+    arrow/.style={->, >=latex, thick, draw=black!70}
+]
+    % Nodes - Following the specified order
+    \node[block] (data) {Biomedical\\Text Data};
+    \node[block, right of=data] (preprocess) {Preprocessing\\(Cleaning, Formatting)};
+    \node[block, right of=preprocess] (batching) {Batching for\\Parallel Execution};
+    \node[block, below of=batching, node distance=3cm] (ner) {Entity Recognition\\(GLiNER)};
+    \node[block, left of=ner] (linking) {Entity Linking\\(UMLS)};
+    \node[block, left of=linking] (relation) {Triplet Closed Information\\Extraction (Relationship\\Extraction)};
+    \node[block, below of=relation, node distance=3cm] (dedup) {Deduplication\\and Filtering};
+    \node[block, right of=dedup] (cypher) {Parse Triplet\\to Cypher};
+    \node[block, right of=cypher] (save) {Neo4j\\Database};
+    
+    % Arrows - Following the specified flow
+    \draw[arrow] (data) -- (preprocess);
+    \draw[arrow] (preprocess) -- (batching);
+    \draw[arrow] (batching) -- (ner);
+    \draw[arrow] (ner) -- (linking);
+    \draw[arrow] (linking) -- (relation);
+    \draw[arrow] (relation) -- (dedup);
+    \draw[arrow] (dedup) -- (cypher);
+    \draw[arrow] (cypher) -- (save);
+
+\end{tikzpicture}
+\caption{System architecture pipeline showing the transformation of biomedical text into a knowledge graph}
+\label{fig:system-architecture}
+\end{figure}
+
 \begin{enumerate}
 \item \textbf{Input and Preprocessing:} Raw biomedical text (free-text) is first collected and preprocessed (cleaning, formatting) to ensure consistent input for NLP tasks.
 \item \textbf{Entity Recognition:} A biomedical Named Entity Recognition (NER) model identifies spans of text corresponding to biomedical concepts (e.g. genes, diseases, chemical compounds, variants, species). We employ the GLiNER model for this step (see Section~\ref{sec:gliner}).
