@@ -102,6 +102,22 @@
 	Note = {AI Quick Reference Guide},
 	Url = {https://milvus.io/ai-quick-reference/what-are-the-use-cases-for-knowledge-graphs-in-healthcare}}
 
+@article{BioRED,
+    author = {Luo, Ling and Lai, Po-Ting and Wei, Chih-Hsuan and Arighi, Cecilia N and Lu, Zhiyong},
+    title = {BioRED: a rich biomedical relation extraction dataset},
+    journal = {Briefings in Bioinformatics},
+    volume = {23},
+    number = {5},
+    pages = {bbac282},
+    year = {2022},
+    month = {07},
+    abstract = {Automated relation extraction (RE) from biomedical literature is critical for many downstream text mining applications in both research and real-world settings. However, most existing benchmarking datasets for biomedical RE only focus on relations of a single type (e.g. protein–protein interactions) at the sentence level, greatly limiting the development of RE systems in biomedicine. In this work, we first review commonly used named entity recognition (NER) and RE datasets. Then, we present a first-of-its-kind biomedical relation extraction dataset (BioRED) with multiple entity types (e.g. gene/protein, disease, chemical) and relation pairs (e.g. gene–disease; chemical–chemical) at the document level, on a set of 600 PubMed abstracts. Furthermore, we label each relation as describing either a novel finding or previously known background knowledge, enabling automated algorithms to differentiate between novel and background information. We assess the utility of BioRED by benchmarking several existing state-of-the-art methods, including Bidirectional Encoder Representations from Transformers (BERT)-based models, on the NER and RE tasks. Our results show that while existing approaches can reach high performance on the NER task (F-score of 89.3\%), there is much room for improvement for the RE task, especially when extracting novel relations (F-score of 47.7\%). Our experiments also demonstrate that such a rich dataset can successfully facilitate the development of more accurate, efficient and robust RE systems for biomedicine.Availability: The BioRED dataset and annotation guidelines are freely available at https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/.},
+    issn = {1477-4054},
+    doi = {10.1093/bib/bbac282},
+    url = {https://doi.org/10.1093/bib/bbac282},
+    eprint = {https://academic.oup.com/bib/article-pdf/23/5/bbac282/45936115/bbac282.pdf},
+}
+
 @article{Leaman2013,
 	Author = {R. Leaman and R. Islamaj Dogan and Z. Lu},
 	Title = {DNorm: disease name normalization with pairwise learning to rank},
@@ -132,7 +148,7 @@
 	Doi = {10.18653/v1/P19-1317}}
 
 @misc{Stenetorp2024,
-	Author = {Anthony Yazdani, Ihor Stepanov, Douglas Teodoro},
+	Author = {A. Yazdani and I. Stepanov and D. Teodoro},
 	Title = {GLiNER-BioMed: A Suite of Efficient Models for Open Biomedical Named Entity Recognition},
 	Year = {2025},
 	Eprint = {2504.00676},
@@ -213,3 +229,48 @@
 	Eprint = {2202.03629},
 	Archiveprefix = {arXiv}}
 
+@article{Lee_2019,
+  title     = {BioBERT: a pre-trained biomedical language representation model for biomedical text mining},
+  volume    = {36},
+  issn      = {1367-4811},
+  url       = {http://dx.doi.org/10.1093/bioinformatics/btz682},
+  doi       = {10.1093/bioinformatics/btz682},
+  number    = {4},
+  journal   = {Bioinformatics},
+  publisher = {Oxford University Press (OUP)},
+  author    = {Lee, Jinhyuk and Yoon, Wonjin and Kim, Sungdong and Kim, Donghyeon and Kim, Sunkyu and So, Chan Ho and Kang, Jaewoo},
+  editor    = {Wren, Jonathan},
+  year      = {2019},
+  month     = sep,
+  pages     = {1234–1240}
+}
+
+@misc{huang2020clinicalbertmodelingclinicalnotes,
+  title         = {ClinicalBERT: Modeling Clinical Notes and Predicting Hospital Readmission},
+  author        = {Kexin Huang and Jaan Altosaar and Rajesh Ranganath},
+  year          = {2020},
+  eprint        = {1904.05342},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CL},
+  url           = {https://arxiv.org/abs/1904.05342}
+}
+
+@misc{beltagy2019scibertpretrainedlanguagemodel,
+  title         = {SciBERT: A Pretrained Language Model for Scientific Text},
+  author        = {Iz Beltagy and Kyle Lo and Arman Cohan},
+  year          = {2019},
+  eprint        = {1903.10676},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CL},
+  url           = {https://arxiv.org/abs/1903.10676}
+}
+
+@misc{bolton2024biomedlm27bparameterlanguage,
+  title         = {BioMedLM: A 2.7B Parameter Language Model Trained On Biomedical Text},
+  author        = {Elliot Bolton and Abhinav Venigalla and Michihiro Yasunaga and David Hall and Betty Xiong and Tony Lee and Roxana Daneshjou and Jonathan Frankle and Percy Liang and Michael Carbin and Christopher D. Manning},
+  year          = {2024},
+  eprint        = {2403.18421},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2403.18421}
+}
