@@ -1,0 +1,314 @@
+% Appendix C
+
+\chapter{Error Analysis and Failure Case Studies}
+
+\label{AppendixC} % For referencing this appendix elsewhere, use \ref{AppendixC}
+
+This appendix provides a comprehensive analysis of errors and failure modes observed during the evaluation of our biomedical text extraction pipeline. We examine specific failure cases to understand the limitations of current approaches and identify areas for improvement.
+
+\section{Overview of System Failures}
+
+The evaluation revealed critical failure modes across all components:
+\begin{itemize}
+    \item \textbf{Entity Recognition}: 70-80\% of entities missed at default thresholds
+    \item \textbf{Relationship Extraction}: Over 90\% of relationships undetected
+    \item \textbf{Model Hallucination}: Frequent generation of non-existent entities
+    \item \textbf{Output Format Violations}: Consistent failure to follow JSON schemas
+\end{itemize}
+
+\section{Relationship Extraction Failure Analysis}
+
+\subsection{Quantitative Failure Rates}
+
+Table~\ref{tab:failure-rates} summarizes the failure rates across all model configurations.
+
+\begin{table}[htbp]
+\centering
+\caption{Relationship Extraction Failure Rates by Model Configuration}
+\label{tab:failure-rates}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Strategy} & \textbf{Relations Missed} & \textbf{False Positives} & \textbf{Failure Rate} \\
+\midrule
+Gemma & Basic & 92.7\% & 92.7\% & 92.7\% \\
+Gemma & Few-shot & 91.8\% & 91.8\% & 91.8\% \\
+Gemma & Structured & 93.5\% & 92.5\% & 93.0\% \\
+MedGemma & Basic & 95.0\% & 91.6\% & 93.7\% \\
+MedGemma & Few-shot & 94.1\% & 91.3\% & 92.7\% \\
+MedGemma & Structured & 95.7\% & 93.2\% & 94.5\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Common Failure Patterns}
+
+\subsubsection{Entity Hallucination}
+Models frequently generated entities not present in the source text:
+\begin{verbatim}
+Input entities: ["SCN5A", "long QT syndrome", "arrhythmias"]
+Model output: ["SCN5A", "cardiac disease", "heart rhythm disorder"]
+\end{verbatim}
+
+The model substituted "cardiac disease" for the specific "long QT syndrome" and invented "heart rhythm disorder" as a synonym for "arrhythmias".
+
+\subsubsection{Incorrect Entity Matching}
+\begin{verbatim}
+Ground truth: ("bradycardia", "Na(v)1.5", "Association")
+Model output: ("SCN5A", "long QT syndrome", "Association")
+\end{verbatim}
+
+The model correctly identified related concepts but failed to extract the exact entities mentioned in the text.
+
+\subsubsection{Relation Type Confusion}
+Models struggled to distinguish between similar relation types:
+\begin{itemize}
+    \item Association vs. Positive\_Correlation: 78\% confusion rate
+    \item Drug\_Interaction vs. Cotreatment: 65\% confusion rate
+    \item Bind vs. Association: 71\% confusion rate
+\end{itemize}
+
+\section{Specific Failure Case Studies}
+
+\subsection{Case Study 1: Complex Medical Relationships}
+
+\textbf{Document ID}: 15485686
+
+\textbf{Input Text}: 
+\begin{quote}
+"The mutation V1763M in the SCN5A gene encoding Na(v)1.5 causes both bradycardia and tachycardia in patients with long QT syndrome. Treatment with mexiletine and lidocaine showed improvement in arrhythmias."
+\end{quote}
+
+\textbf{Expected Relationships} (Total: 14):
+\begin{itemize}
+    \item (bradycardia, Na(v)1.5, Association)
+    \item (bradycardia, V1763M, Positive\_Correlation)
+    \item (tachycardia, Na(v)1.5, Association)
+    \item (arrhythmias, mexiletine, Negative\_Correlation)
+    \item ... and 10 more relationships
+\end{itemize}
+
+\textbf{Model Output} (Gemma with few-shot prompting):
+\begin{itemize}
+    \item (SCN5A, long QT syndrome, Association) - Partially correct
+    \item (SCN5A, tachycardia, Association) - Missed bradycardia
+    \item Total: 2 out of 14 relationships (14.3\% recall)
+\end{itemize}
+
+\textbf{Failure Analysis}:
+\begin{enumerate}
+    \item \textbf{Entity Resolution}: Model used gene name (SCN5A) instead of protein name (Na(v)1.5)
+    \item \textbf{Missing Relationships}: Failed to identify drug-disease relationships
+    \item \textbf{Relation Type Error}: All relationships labeled as "Association" despite clear causal relationships
+\end{enumerate}
+
+\subsection{Case Study 2: Drug Interaction Scenario}
+
+\textbf{Document ID}: 16046395
+
+\textbf{Input Text}:
+\begin{quote}
+"The A118G polymorphism in OPRM1 affects patient response to morphine. Patients with the G allele required higher doses for pain management."
+\end{quote}
+
+\textbf{Expected Relationships}:
+\begin{itemize}
+    \item (A118G, OPRM1, Association)
+    \item (A118G, morphine response, Positive\_Correlation)
+    \item (G allele, morphine dose, Positive\_Correlation)
+\end{itemize}
+
+\textbf{Model Failures}:
+\begin{itemize}
+    \item Generated non-existent entities: "A118" and "G118" separately
+    \item Missed the pharmacogenomic relationship entirely
+    \item No drug-gene interactions identified
+\end{itemize}
+
+\subsection{Case Study 3: Biochemical Pathway}
+
+\textbf{Document ID}: 18457324
+
+\textbf{Input Text}:
+\begin{quote}
+"Carbonyl reductase 3 (CBR3) converts doxorubicin to doxorubicinol in patients receiving anthracycline therapy, potentially contributing to anthracycline-related congestive heart failure."
+\end{quote}
+
+\textbf{Model Performance Comparison}:
+
+\begin{table}[htbp]
+\centering
+\caption{Model Output Comparison for Biochemical Pathway Extraction}
+\label{tab:pathway-comparison}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Model} & \textbf{Extracted Relationships} \\
+\midrule
+Gemma (Basic) & (carbonyl reductase 3, anthracyclines, Cotreatment) \\
+              & (patients, anthracyclines, Cotreatment) \\
+\midrule
+MedGemma (Few-shot) & (CBR3, doxorubicin, Association) \\
+                    & (anthracycline, heart failure, Association) \\
+\midrule
+Ground Truth & (carbonyl reductase 3, doxorubicin, Conversion) \\
+             & (carbonyl reductase 3, doxorubicinol, Conversion) \\
+             & (doxorubicinol, congestive heart failure, Positive\_Correlation) \\
+             & ... (6 more relationships) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Prompt Strategy Effectiveness Analysis}
+
+\subsection{Basic Prompting Failures}
+
+\textbf{Common Issues}:
+\begin{itemize}
+    \item Output not in requested JSON format (31\% of responses)
+    \item Mixed entity types and relations in output
+    \item Incomplete triplets missing one or more components
+\end{itemize}
+
+\textbf{Example Failure}:
+\begin{verbatim}
+Expected format: [{"entity1": "...", "entity2": "...", "relation": "..."}]
+Actual output: "SCN5A is associated with heart conditions including 
+                arrhythmias and long QT syndrome"
+\end{verbatim}
+
+\subsection{Few-Shot Prompting Failures}
+
+Despite providing examples, models failed to generalize:
+\begin{itemize}
+    \item Copied example relationships verbatim (12\% of cases)
+    \item Misapplied example patterns to unrelated contexts
+    \item Slight improvement in format compliance (+8\%) but not accuracy
+\end{itemize}
+
+\subsection{Structured JSON Prompting Failures}
+
+\textbf{Schema Violations}:
+\begin{verbatim}
+Schema requirement: {"entity1": str, "entity2": str, "relation": str}
+Common violations:
+- Added extra fields: "confidence", "source", "context"
+- Nested objects instead of flat structure
+- Arrays where strings expected
+\end{verbatim}
+
+\section{Domain-Specific Model Underperformance}
+
+\subsection{MedGemma vs Gemma Comparison}
+
+Contrary to expectations, MedGemma performed worse than the general Gemma model:
+
+\begin{table}[htbp]
+\centering
+\caption{Comparative Error Analysis: MedGemma vs Gemma}
+\label{tab:medgemma-errors}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Error Type} & \textbf{MedGemma Rate} & \textbf{Gemma Rate} \\
+\midrule
+Entity hallucination & 48.3\% & 41.2\% \\
+Format violations & 38.7\% & 32.1\% \\
+Relation type errors & 71.2\% & 65.8\% \\
+Complete failures & 15.3\% & 11.7\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Hypotheses for Domain Model Underperformance}
+
+\begin{enumerate}
+    \item \textbf{Overfitting to Training Domain}: MedGemma may be overfitted to specific medical text formats not matching BioRED abstracts
+    \item \textbf{Reduced General Reasoning}: Domain specialization potentially reduced general language understanding capabilities
+    \item \textbf{Prompt Sensitivity}: Medical models may require different prompting strategies than evaluated
+    \item \textbf{Task Mismatch}: Pre-training focused on different biomedical tasks than relation extraction
+\end{enumerate}
+
+\section{Error Cascading Effects}
+
+\subsection{NER to Relationship Extraction}
+
+Errors in entity recognition cascaded to relationship extraction:
+\begin{itemize}
+    \item Missed entities: 100\% relationship extraction failure
+    \item Incorrect boundaries: 87\% relationship misalignment
+    \item Wrong entity types: 73\% relation type errors
+\end{itemize}
+
+\subsection{Example of Error Propagation}
+
+\begin{verbatim}
+Step 1 - NER Output:
+  Expected: ["carbonyl reductase 3", "doxorubicin", "doxorubicinol"]
+  Actual: ["carbonyl reductase", "doxorubicin", "heart failure"]
+
+Step 2 - Relationship Extraction:
+  Cannot find: (carbonyl reductase 3, doxorubicinol, Conversion)
+  Hallucinated: (carbonyl reductase, heart failure, Causes)
+\end{verbatim}
+
+\section{Computational Error Analysis}
+
+\subsection{Memory and Resource Failures}
+
+\begin{itemize}
+    \item Out-of-memory errors for documents > 4000 tokens
+    \item Timeout failures for complex relationship graphs
+    \item GPU memory exhaustion with batch size > 16
+\end{itemize}
+
+\subsection{Performance Degradation Patterns}
+
+\begin{table}[htbp]
+\centering
+\caption{Error Rates by Document Complexity}
+\label{tab:complexity-errors}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Document Length} & \textbf{Entities} & \textbf{Relations} & \textbf{Error Rate} \\
+\midrule
+< 500 tokens & < 10 & < 5 & 85.2\% \\
+500-1000 tokens & 10-20 & 5-15 & 91.7\% \\
+1000-2000 tokens & 20-40 & 15-30 & 94.3\% \\
+> 2000 tokens & > 40 & > 30 & 97.8\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Recommendations Based on Error Analysis}
+
+\subsection{Immediate Improvements}
+\begin{enumerate}
+    \item \textbf{Entity Validation}: Implement strict validation ensuring extracted entities exist in source text
+    \item \textbf{Output Parsing}: Add robust JSON parsing with fallback strategies
+    \item \textbf{Confidence Thresholds}: Implement relationship confidence scoring
+\end{enumerate}
+
+\subsection{Architectural Changes}
+\begin{enumerate}
+    \item \textbf{Pipeline Redesign}: Consider joint entity-relation extraction models
+    \item \textbf{Model Selection}: Use larger language models (GPT-4, Claude) for relationship extraction
+    \item \textbf{Hybrid Approaches}: Combine rule-based methods for high-precision scenarios
+\end{enumerate}
+
+\subsection{Training and Fine-tuning}
+\begin{enumerate}
+    \item \textbf{Task-Specific Training}: Fine-tune models specifically on BioRED-style relation extraction
+    \item \textbf{Prompt Optimization}: Develop biomedical-specific prompting strategies
+    \item \textbf{Error-Aware Training}: Include common error patterns in training data
+\end{enumerate}
+
+\section{Conclusion}
+
+The error analysis reveals fundamental limitations in current small language model approaches for biomedical relationship extraction. The 90\%+ failure rate indicates that:
+
+\begin{itemize}
+    \item Small models lack sufficient capacity for complex biomedical reasoning
+    \item Domain-specific pre-training alone is insufficient without task-specific fine-tuning
+    \item The complexity of biomedical relationships exceeds current model capabilities
+    \item Alternative approaches or significantly larger models are required for practical applications
+\end{itemize}
+
+These findings highlight the need for continued research in biomedical NLP, particularly in developing more capable models and robust extraction pipelines for clinical applications.

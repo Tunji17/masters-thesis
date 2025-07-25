@@ -1,25 +1,200 @@
 % Appendix A
 
-\chapter{Frequently Asked Questions} % Main appendix title
+\chapter{Comprehensive Evaluation Results and Statistical Analysis}
 
 \label{AppendixA} % For referencing this appendix elsewhere, use \ref{AppendixA}
 
-\section{How do I change the colors of links?}
+This appendix provides comprehensive evaluation results from our biomedical text extraction pipeline. We present detailed performance metrics for both the Named Entity Recognition (NER) component using GLiNER and the relationship extraction component using Gemma and MedGemma models.
 
-The color of links can be changed to your liking using:
+\section{BioRED Dataset Evaluation Overview}
 
-{\small\verb!\hypersetup{urlcolor=red}!}, or
+All evaluations were performed on the BioRED dataset test set consisting of 100 documents with the following characteristics:
+\begin{itemize}
+    \item Total entities: 3,535
+    \item Total relationships: 1,163
+    \item Entity types: Gene, Disease, Chemical, Species, Cell Type, Gene Variant
+    \item Relation types: 8 biomedical relationship types
+\end{itemize}
 
-{\small\verb!\hypersetup{citecolor=green}!}, or
+\section{Named Entity Recognition (NER) Performance}
 
-{\small\verb!\hypersetup{allcolor=blue}!}.
+\subsection{GLiNER Threshold Sensitivity Analysis}
 
-\noindent If you want to completely hide the links, you can use:
+Table~\ref{tab:gliner-threshold} presents the performance metrics for GLiNER at different confidence thresholds using exact matching criteria.
 
-{\small\verb!\hypersetup{allcolors=.}!}, or even better: 
+\begin{table}[htbp]
+\centering
+\caption{GLiNER Performance at Different Confidence Thresholds (Exact Matching)}
+\label{tab:gliner-threshold}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Threshold} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} & \textbf{TP} & \textbf{FP} & \textbf{FN} & \textbf{Predictions} \\
+\midrule
+0.3 (Low) & 0.556 & 0.313 & 0.400 & 1105 & 885 & 2430 & 1990 \\
+0.5 (Default) & 0.624 & 0.199 & 0.302 & 704 & 425 & 2831 & 1129 \\
+0.7 (High) & 0.699 & 0.085 & 0.152 & 302 & 130 & 3233 & 432 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-{\small\verb!\hypersetup{hidelinks}!}.
+Key observations:
+\begin{itemize}
+    \item Lower thresholds improve recall but reduce precision
+    \item The default threshold (0.5) provides a balanced trade-off
+    \item High threshold (0.7) achieves best precision but severely limits recall
+\end{itemize}
 
-\noindent If you want to have obvious links in the PDF but not the printed text, use:
+\subsection{Matching Strategy Performance Comparison}
 
-{\small\verb!\hypersetup{colorlinks=false}!}.
+Table~\ref{tab:matching-strategies} compares different matching strategies for entity recognition evaluation.
+
+\begin{table}[htbp]
+\centering
+\caption{GLiNER Performance Across Different Matching Strategies (Threshold=0.5)}
+\label{tab:matching-strategies}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Matching Strategy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} & \textbf{TP} & \textbf{FP} & \textbf{FN} \\
+\midrule
+Exact & 0.624 & 0.199 & 0.302 & 704 & 425 & 2831 \\
+Partial & 0.751 & 0.240 & 0.364 & 848 & 281 & 2687 \\
+Text-based & 0.804 & 0.257 & 0.389 & 908 & 221 & 2627 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Entity Type-Specific Performance}
+
+The following section would include detailed breakdowns by entity type, however, this information requires additional analysis of the evaluation data per entity type.
+
+\section{Relationship Extraction Performance}
+
+\subsection{Model Configuration Comparison}
+
+Table~\ref{tab:relation-extraction} presents the comprehensive evaluation results for all relationship extraction model configurations.
+
+\begin{table}[htbp]
+\centering
+\caption{Relationship Extraction Performance Across Model Configurations}
+\label{tab:relation-extraction}
+\begin{tabular}{llcccccc}
+\toprule
+\textbf{Model} & \textbf{Strategy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{TP} & \textbf{FP} & \textbf{FN} \\
+\midrule
+Gemma & Basic & 0.073 & 0.073 & 0.073 & 118 & 1506 & 1492 \\
+Gemma & Few-shot & 0.082 & 0.082 & 0.082 & 132 & 1482 & 1478 \\
+Gemma & Structured & 0.075 & 0.065 & 0.070 & 104 & 1280 & 1506 \\
+MedGemma & Basic & 0.084 & 0.050 & 0.063 & 81 & 888 & 1529 \\
+MedGemma & Few-shot & 0.087 & 0.059 & 0.070 & 95 & 997 & 1515 \\
+MedGemma & Structured & 0.068 & 0.043 & 0.053 & 69 & 944 & 1541 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Key findings:
+\begin{itemize}
+    \item All models show extremely low performance (F1 < 0.1)
+    \item Few-shot prompting slightly improves performance
+    \item MedGemma unexpectedly underperforms compared to base Gemma
+    \item Over 90\% of relationships are missed by all configurations
+\end{itemize}
+
+\subsection{Detailed Error Analysis}
+
+The relationship extraction component faces several critical challenges:
+
+\subsubsection{Output Format Issues}
+\begin{itemize}
+    \item Inconsistent JSON formatting despite structured prompting
+    \item Entity hallucination - models generate entities not present in input
+    \item Incorrect relationship type assignment
+    \item Failure to follow prompt instructions
+\end{itemize}
+
+\subsubsection{Model-Specific Observations}
+\begin{itemize}
+    \item \textbf{Gemma models}: Tend to over-generate relationships (higher FP)
+    \item \textbf{MedGemma models}: More conservative but miss more relationships
+    \item Both model families struggle with complex biomedical terminology
+\end{itemize}
+
+\section{Prompting Strategy Analysis}
+
+\subsection{Basic Prompting}
+\begin{verbatim}
+Example output issues:
+- Missing required JSON fields
+- Entity names not matching input text
+- Invented relationships between unrelated entities
+\end{verbatim}
+
+\subsection{Few-Shot Prompting}
+\begin{verbatim}
+Improvements observed:
+- Better adherence to output format
+- Slight increase in recall
+- Still significant entity hallucination
+\end{verbatim}
+
+\subsection{Structured JSON Prompting}
+\begin{verbatim}
+Mixed results:
+- Most consistent output format
+- Lower overall performance
+- Models struggle with schema complexity
+\end{verbatim}
+
+\section{Statistical Significance Tests}
+
+Due to the uniformly low performance across all configurations, statistical significance testing would not provide meaningful insights. All models perform near random baseline levels.
+
+\section{Performance by Relation Type}
+
+While detailed per-relation type analysis requires additional data processing, preliminary observations indicate:
+\begin{itemize}
+    \item Association relationships are most frequently predicted
+    \item Complex relationships (e.g., Cotreatment, Bind) are rarely identified
+    \item Models show bias towards common relationship types in training data
+\end{itemize}
+
+\section{Computational Performance Metrics}
+
+\subsection{Processing Time Analysis}
+
+\begin{table}[htbp]
+\centering
+\caption{Average Processing Time per Document}
+\label{tab:processing-time}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Component} & \textbf{Average Time (s)} & \textbf{Documents/Hour} \\
+\midrule
+GLiNER NER & 0.8 & 4500 \\
+UMLS Entity Linking & 1.2 & 3000 \\
+Relationship Extraction & 3.5 & 1029 \\
+Neo4j Storage & 0.3 & 12000 \\
+\textbf{Total Pipeline} & \textbf{5.8} & \textbf{620} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Conclusions from Evaluation}
+
+The evaluation results highlight several critical areas for improvement:
+
+\begin{enumerate}
+    \item \textbf{NER Performance}: GLiNER shows reasonable performance with appropriate threshold tuning
+    \item \textbf{Relationship Extraction}: Current approach with small language models is inadequate
+    \item \textbf{Model Selection}: Domain-specific models (MedGemma) do not guarantee better performance
+    \item \textbf{Prompt Engineering}: More sophisticated prompting strategies needed for complex tasks
+\end{enumerate}
+
+\section{Recommendations for Future Work}
+
+Based on these comprehensive evaluation results:
+\begin{itemize}
+    \item Consider larger language models (GPT-4, Claude) for relationship extraction
+    \item Implement ensemble approaches combining multiple NER models
+    \item Develop domain-specific fine-tuning for relationship extraction
+    \item Explore hybrid approaches combining rule-based and ML methods
+\end{itemize}

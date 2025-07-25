@@ -1,0 +1,411 @@
+% Appendix B
+
+\chapter{Technical Implementation and Reproducibility Guide}
+
+\label{AppendixB} % For referencing this appendix elsewhere, use \ref{AppendixB}
+
+This appendix provides comprehensive technical details for reproducing the biomedical text extraction pipeline, including complete prompt templates, Neo4j schema definitions, and model configurations.
+
+\section{System Requirements and Dependencies}
+
+\subsection{Hardware Requirements}
+\begin{itemize}
+    \item GPU: NVIDIA GPU with 8GB+ VRAM (recommended) or Apple Silicon (M1/M2)
+    \item RAM: 16GB minimum, 32GB recommended
+    \item Storage: 50GB for models and data
+\end{itemize}
+
+\subsection{Software Dependencies}
+\begin{verbatim}
+Python 3.11+
+transformers==4.51.3
+datasets==3.6.0
+spacy==3.6.1
+scispacy==0.5.5
+gliner==0.2.0
+mlx-lm==0.15.0 (for Apple Silicon)
+neo4j==5.20.0
+pandas==2.0.3
+numpy==1.26.4
+\end{verbatim}
+
+\section{GLiNER Biomedical Model Configuration}
+
+\subsection{Model Initialization}
+\begin{verbatim}
+from gliner import GLiNER
+
+# Load pre-trained biomedical GLiNER model
+model = GLiNER.from_pretrained("Ihor/gliner-biomed-bi-large-v1.0")
+
+# Entity type labels for biomedical NER
+labels = [
+    "GeneOrGeneProduct",
+    "DiseaseOrPhenotypicFeature", 
+    "ChemicalEntity",
+    "SequenceVariant",
+    "CellLine",
+    "OrganismTaxon"
+]
+\end{verbatim}
+
+\subsection{Threshold Configuration}
+The evaluation tested three confidence threshold settings:
+\begin{itemize}
+    \item \textbf{Low threshold (0.3)}: Maximum recall, lower precision
+    \item \textbf{Default threshold (0.5)}: Balanced performance
+    \item \textbf{High threshold (0.7)}: Maximum precision, lower recall
+\end{itemize}
+
+\begin{verbatim}
+# Entity extraction with configurable threshold
+predictions = model.predict_entities(
+    text,
+    labels=labels,
+    threshold=0.5  # Adjustable: 0.3, 0.5, or 0.7
+)
+\end{verbatim}
+
+\subsection{Optimization Parameters}
+\begin{verbatim}
+# Batch processing for efficiency
+batch_size = 8  # Adjust based on GPU memory
+
+# Maximum sequence length
+max_length = 512  # GLiNER token limit
+
+# Parallel processing
+max_workers = 4  # For multi-threaded execution
+\end{verbatim}
+
+\section{Relationship Extraction Prompt Templates}
+
+\subsection{Basic Prompting Strategy}
+\begin{verbatim}
+def create_basic_prompt(text, entities):
+    prompt = f"""Your goal is to perform a Closed Information 
+Extraction task on the following clinical note:
+
+{text}
+
+You are provided with a list of medical entities extracted 
+from the note:
+{entities}
+
+RELATION TYPES:
+- Association: General association between entities
+- Positive_Correlation: Entity1 increases/enhances Entity2
+- Negative_Correlation: Entity1 decreases/inhibits Entity2
+- Bind: Physical binding between entities
+- Cotreatment: Entities used together in treatment
+- Comparison: Comparing effectiveness of entities
+- Drug_Interaction: Interaction between drugs
+- Conversion: One entity converts to another
+
+Your task is to generate high quality triplets of the form 
+(entity1, relation, entity2) where:
+- The relationship is explicitly stated or strongly implied
+- The entities are from the provided list (exact text)
+- The triplets should be clinically meaningful
+
+Please return the triplets in the following JSON format:
+[
+  {
+    "entity1": "entity name",
+    "entity2": "entity name",
+    "relation": "relation_type"
+  }
+]"""
+    return prompt
+\end{verbatim}
+
+\subsection{Few-Shot Prompting Strategy}
+\begin{verbatim}
+def create_few_shot_prompt(text, entities):
+    prompt = f"""Your goal is to perform a Closed Information 
+Extraction task on the following clinical note:
+
+{text}
+
+You are provided with a list of medical entities extracted 
+from the note:
+{entities}
+
+RELATION TYPES:
+[Same as basic strategy...]
+
+Some few-shot examples to guide you:
+Example 1:
+Text: "Aspirin treatment reduced inflammation in patients 
+       with arthritis."
+Entities: aspirin (ChemicalEntity), inflammation 
+          (DiseaseOrPhenotypicFeature), arthritis 
+          (DiseaseOrPhenotypicFeature)
+Relations: [{"entity1": "aspirin", "entity2": "inflammation", 
+            "relation": "Negative_Correlation"}]
+
+Example 2:
+Text: "The protein binds to DNA and regulates gene expression."
+Entities: protein (GeneOrGeneProduct), DNA (GeneOrGeneProduct), 
+          gene expression (GeneOrGeneProduct)
+Relations: [{"entity1": "protein", "entity2": "DNA", 
+            "relation": "Bind"}]
+
+Please return the triplets in the following JSON format:
+[...]"""
+    return prompt
+\end{verbatim}
+
+\subsection{Structured JSON Prompting Strategy}
+\begin{verbatim}
+def create_structured_prompt(text, entities):
+    prompt = f"""BIOMEDICAL RELATION EXTRACTION TASK
+
+INPUT TEXT:
+{text}
+
+AVAILABLE ENTITIES:
+{entities}
+
+RELATION TYPES:
+[Same as basic strategy...]
+
+INSTRUCTIONS:
+1. Identify pairs of entities that have relationships
+2. Determine the most appropriate relation type
+3. Only extract relations explicitly stated or strongly implied
+
+OUTPUT FORMAT (JSON):
+[
+  {
+    "entity1": "exact entity text",
+    "entity2": "exact entity text",  
+    "relation": "relation_type"
+  }
+]"""
+    return prompt
+\end{verbatim}
+
+\section{Neo4j Graph Schema and Cypher Templates}
+
+\subsection{Graph Schema Design}
+\begin{verbatim}
+// Node Schema
+(:MedicalEntity {
+    name: String,           // Entity text
+    cui: String,           // UMLS Concept Unique Identifier
+    canonical_name: String, // UMLS canonical name
+    semantic_types: String, // Pipe-separated semantic types
+    linking_score: Float,   // SciSpacy confidence score
+    description: String     // Entity definition
+})
+
+// Relationship Schema
+()-[:RELATIONSHIP {
+    type: String,          // Relationship type
+    source_document: String, // Document ID
+    confidence: Float      // Optional confidence score
+}]->()
+\end{verbatim}
+
+\subsection{Entity Creation Cypher Template}
+\begin{verbatim}
+// Create or merge entities with UMLS metadata
+MERGE (e:MedicalEntity {name: $entity_name})
+ON CREATE SET 
+    e.cui = $cui,
+    e.canonical_name = $canonical_name,
+    e.semantic_types = $semantic_types,
+    e.linking_score = $linking_score,
+    e.description = $description
+ON MATCH SET
+    e.cui = COALESCE(e.cui, $cui),
+    e.canonical_name = COALESCE(e.canonical_name, $canonical_name)
+RETURN e
+\end{verbatim}
+
+\subsection{Relationship Creation Cypher Template}
+\begin{verbatim}
+// Create relationships between entities
+MATCH (e1:MedicalEntity {name: $entity1_name})
+MATCH (e2:MedicalEntity {name: $entity2_name})
+MERGE (e1)-[r:RELATIONSHIP {type: $relation_type}]->(e2)
+ON CREATE SET
+    r.source_document = $document_id,
+    r.timestamp = timestamp()
+RETURN e1, r, e2
+\end{verbatim}
+
+\subsection{Query Templates for Knowledge Retrieval}
+\begin{verbatim}
+// Find all relationships for a specific entity
+MATCH (e:MedicalEntity {name: $entity_name})-[r:RELATIONSHIP]-()
+RETURN e, r
+
+// Find entities connected by specific relationship type
+MATCH (e1:MedicalEntity)-[r:RELATIONSHIP {type: $rel_type}]->(e2)
+RETURN e1.name, r.type, e2.name
+
+// Find multi-hop relationships (e.g., drug interactions)
+MATCH path = (e1:MedicalEntity)-[:RELATIONSHIP*1..2]-(e2:MedicalEntity)
+WHERE e1.name = $start_entity AND e2.name = $end_entity
+RETURN path
+\end{verbatim}
+
+\section{SciSpacy Entity Linking Configuration}
+
+\subsection{Pipeline Setup}
+\begin{verbatim}
+import spacy
+import scispacy
+from scispacy.linking import EntityLinker
+from scispacy.abbreviation import AbbreviationDetector
+
+# Load SciSpacy biomedical model
+nlp = spacy.load("en_core_sci_lg")
+
+# Add abbreviation detector
+nlp.add_pipe("abbreviation_detector")
+
+# Add UMLS entity linker with configuration
+nlp.add_pipe("scispacy_linker", config={
+    "resolve_abbreviations": True,
+    "linker_name": "umls",
+    "max_entities_per_mention": 3,  # Top 3 candidates
+    "threshold": 0.7  # Minimum similarity score
+})
+\end{verbatim}
+
+\subsection{Entity Linking Process}
+\begin{verbatim}
+def link_entities(text, gliner_entities):
+    """Link GLiNER entities to UMLS concepts."""
+    doc = nlp(text)
+    entity_links = {}
+    
+    for ent in doc.ents:
+        if ent._.kb_ents:
+            candidates = []
+            for umls_ent in ent._.kb_ents[:3]:
+                cui, score = umls_ent
+                linker = nlp.get_pipe("scispacy_linker")
+                kb_entity = linker.kb.cui_to_entity[cui]
+                candidates.append({
+                    'cui': cui,
+                    'score': score,
+                    'name': kb_entity.canonical_name,
+                    'definition': kb_entity.definition,
+                    'types': list(kb_entity.types)
+                })
+            entity_links[ent.text.lower()] = candidates
+    
+    return entity_links
+\end{verbatim}
+
+\section{Model Training and Deployment}
+
+\subsection{Environment Setup}
+\begin{verbatim}
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Download models
+python -m spacy download en_core_sci_lg
+\end{verbatim}
+
+\subsection{Running the Pipeline For GLiNER Evaluation}
+\begin{verbatim}
+python gliner_evaluation.py
+\end{verbatim}
+
+\subsection{Running the Pipeline For Gemma Evaluation}
+\begin{verbatim}
+python gemma_evaluation.py
+\end{verbatim}
+
+\section{Performance Optimization}
+
+\subsection{Caching Strategy}
+\begin{verbatim}
+from functools import lru_cache
+
+@lru_cache(maxsize=10000)
+def cached_entity_lookup(entity_text: str) -> Dict:
+    """Cache UMLS lookups for repeated entities."""
+    doc = nlp(entity_text)
+    # ... entity linking logic ...
+    return entity_metadata
+\end{verbatim}
+
+\subsection{Parallel Processing}
+\begin{verbatim}
+import concurrent.futures
+
+def process_documents_parallel(documents, max_workers=4):
+    """Process multiple documents in parallel."""
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=max_workers
+    ) as executor:
+        futures = [
+            executor.submit(process_single_document, doc) 
+            for doc in documents
+        ]
+        results = [
+            future.result() 
+            for future in concurrent.futures.as_completed(futures)
+        ]
+    return results
+\end{verbatim}
+
+\section{Reproducibility Checklist}
+
+To ensure reproducibility of results:
+
+\begin{enumerate}
+    \item \textbf{Data}: Use BioRED dataset (version specified in evaluation)
+    \item \textbf{Random Seeds}: Set all random seeds to 42
+    \item \textbf{Model Versions}: Use exact model versions specified
+    \item \textbf{Hardware}: Document GPU/CPU specifications
+    \item \textbf{Evaluation}: Use provided evaluation scripts
+\end{enumerate}
+
+\begin{verbatim}
+# Set random seeds for reproducibility
+import random
+import numpy as np
+import torch
+
+random.seed(42)
+np.random.seed(42)
+torch.manual_seed(42)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(42)
+\end{verbatim}
+
+\section{Troubleshooting Common Issues}
+
+\subsection{Memory Issues}
+\begin{itemize}
+    \item Reduce batch size for large documents
+    \item Use gradient checkpointing for large models
+    \item Clear cache between batches: \texttt{torch.cuda.empty\_cache()}
+\end{itemize}
+
+\subsection{UMLS Licensing}
+\begin{itemize}
+    \item UMLS access requires registration at \url{https://uts.nlm.nih.gov}
+    \item Download UMLS data for SciSpacy: \texttt{pip install scispacy-umls}
+\end{itemize}
+
+\subsection{Neo4j Connection}
+\begin{itemize}
+    \item Ensure Neo4j service is running: \texttt{neo4j start}
+    \item Check connection: \texttt{cypher-shell -u neo4j -p password}
+    \item Increase heap memory for large graphs in \texttt{neo4j.conf}
+\end{itemize}
