@@ -1,0 +1,13 @@
+fastapi==0.115.0
+uvicorn==0.32.0
+neo4j==5.26.0
+python-dotenv==1.0.1
+pydantic==2.10.0
+pydantic-settings==2.6.0
+scispacy==0.5.5
+spacy==3.7.2
+mlx==0.28.0
+mlx-lm==0.26.3
+numpy==1.26.4
+datasets==3.6.0
+pandas==2.2.3
