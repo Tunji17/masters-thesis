@@ -89,14 +89,15 @@
             \vspace{0.5cm}
             \begin{tikzpicture}[scale=0.8]
                 % Manual pie chart - corrected for 80-20 split
+                % 80% = 288 degrees, 20% = 72 degrees
                 \filldraw[ulblue!70] (0,0) -- (0,2) arc (90:-198:2) -- cycle;
-                \filldraw[gray!30] (0,0) -- (0,2) arc (-198:90:2) -- cycle;
+                \filldraw[gray!30] (0,0) -- (0,2) arc (90:162:2) -- cycle;
                 \draw[thick] (0,0) circle (2);
                 
-                \node at (1.2,0.3) {\footnotesize 80\%};
+                \node at (0.8,-0.8) {\footnotesize 80\%};
                 \node at (-0.7,0.7) {\footnotesize 20\%};
-                \node at (-1.5,-0.5) {\tiny Structured};
-                \node at (1.5,-0.5) {\tiny Unstructured};
+                \node at (-1.2,1.2) {\tiny Structured};
+                \node at (0.8,-1.2) {\tiny Unstructured};
                 \node at (0,-2.7) {\footnotesize Biomedical Data Distribution};
             \end{tikzpicture}
         \end{column}
