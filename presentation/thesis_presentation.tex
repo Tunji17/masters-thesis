@@ -116,14 +116,14 @@
             };
             
             \node[draw, rectangle, fill=ulgreen!30, minimum width=3cm, minimum height=1.5cm] (kg) at (8,0) {
-                \begin{minipage}{2.8cm}
+                \begin{minipage}{5.0cm}
                     \footnotesize
                     Diabetes $\rightarrow$ CAUSES $\rightarrow$ Neuropathy
                 \end{minipage}
             };
             
-            \draw[->, thick, ulblue] (3.2,0) -- (4.8,0);
-            \node at (4,0.8) {\footnotesize \textbf{Our Pipeline}};
+            \draw[->, thick, ulblue] (2.2,0) -- (4.8,0);
+            \node at (3.5,0.8) {\footnotesize \textbf{Our Pipeline}};
             
             \node at (0,-1.2) {\footnotesize Unstructured Text};
             \node at (8,-1.2) {\footnotesize Knowledge Graph};
@@ -145,9 +145,8 @@
         \item \textbf{Compare domain-specific vs. general language models} for relationship extraction
         
         \item \textbf{Construct an actionable biomedical knowledge graph} using Neo4j
-        
-        \item \textbf{Ensure ethical compliance} with data usage policies
-        
+
+
         \item \textbf{Evaluate performance} using precision, recall, and F1 metrics
     \end{enumerate}
 \end{frame}
@@ -180,10 +179,10 @@
             \centering
             \vspace{1cm}
             \begin{tikzpicture}[scale=0.8]
-                \node[circle, draw, fill=nercolor!30, minimum size=1.2cm] (drug) at (0,2) {\footnotesize Drug};
-                \node[circle, draw, fill=linkcolor!30, minimum size=1.2cm] (disease) at (2.5,0) {\footnotesize Disease};
+                \node[circle, draw, fill=nercolor!30, minimum size=1.2cm] (drug) at (0,3) {\footnotesize Drug};
+                \node[circle, draw, fill=linkcolor!30, minimum size=1.2cm] (disease) at (3.5,0) {\footnotesize Disease};
                 \node[circle, draw, fill=relcolor!30, minimum size=1.2cm] (gene) at (0,0) {\footnotesize Gene};
-                \node[circle, draw, fill=graphcolor!30, minimum size=1.2cm] (pathway) at (-2.5,1) {\footnotesize Pathway};
+                \node[circle, draw, fill=graphcolor!30, minimum size=1.2cm] (pathway) at (-3.5,1) {\footnotesize Pathway};
                 
                 \draw[->, thick] (drug) -- node[above] {\tiny treats} (disease);
                 \draw[->, thick] (gene) -- node[right] {\tiny causes} (disease);
@@ -201,7 +200,6 @@
             \setlength{\itemsep}{0.3cm}
             \item Domain-specific terminology and abbreviations
             \item Variable nomenclature across contexts
-            \item Complex sentence structures
             \item Context-dependent meanings
         \end{itemize}
     \end{block}
@@ -213,7 +211,6 @@
             \item Exponential growth: thousands of papers daily
             \item Heterogeneous data sources
             \item Quality inconsistencies
-            \item Integration complexity
         \end{itemize}
     \end{block}
 \end{frame}
@@ -241,14 +238,7 @@
         
         \draw[dashed, thick, ulblue] (1,0.8) -- (3,1.2) -- (6,2.2) -- (10,3.2);
     \end{tikzpicture}
-    
-    \vspace{0.8cm}
-    \begin{itemize}
-        \setlength{\itemsep}{0.4cm}
-        \item \textbf{Rule-based} → \textbf{Statistical ML} → \textbf{Transformer-based}
-        \item Domain-specific models: BioBERT, ClinicalBERT, SciBERT
-        \item Latest: Large Language Models (GPT, Gemma, MedGemma)
-    \end{itemize}
+
 \end{frame}
 
 \begin{frame}{State-of-the-Art Approaches}
@@ -262,13 +252,12 @@
                 \item Natural language descriptors
                 \item 6\% F1 improvement over previous systems
             \end{itemize}
-            
+
             \vspace{0.4cm}
             \textbf{Entity Linking:}
             \begin{itemize}
                 \setlength{\itemsep}{0.2cm}
                 \item UMLS: 3M+ medical concepts
-                \item SciSpacy: TF-IDF character n-grams
                 \item Handles abbreviations and synonyms
             \end{itemize}
         \end{column}
@@ -276,9 +265,8 @@
             \textbf{Relationship Extraction:}
             \begin{itemize}
                 \setlength{\itemsep}{0.2cm}
-                \item Rule-based → ML → Neural → LLMs
-                \item Zero-shot with prompting
-                \item Domain-specific vs. general models
+                \item Fine-tuned LLMs (Gemma, MedGemma)
+                \item Zero-shot or few-shot with prompting
             \end{itemize}
             
             \vspace{0.4cm}
@@ -299,7 +287,7 @@
     \vspace{0.5cm}
     \begin{center}
         \begin{tikzpicture}[
-            node distance=1.5cm,
+            node distance=4.0cm,
             block/.style={rectangle, draw, fill=blue!20, minimum width=2.2cm, minimum height=1cm, font=\footnotesize, align=center},
             arrow/.style={->, >=latex, thick}
         ]
@@ -307,15 +295,14 @@
             \node[block, right of=data, fill=nercolor!30] (ner) {Entity Recognition\\(GLiNER)};
             \node[block, right of=ner, fill=linkcolor!30] (linking) {Entity Linking\\(UMLS)};
             \node[block, below of=linking, fill=relcolor!30] (relation) {Relationship\\Extraction\\(Gemma/MedGemma)};
-            \node[block, left of=relation, fill=graphcolor!30] (graph) {Knowledge Graph\\(Neo4j)};
-            \node[block, left of=graph, fill=ulgreen!30] (cypher) {Cypher Query\\Generation};
-            
+            \node[block, left of=relation, fill=ulgreen!30] (cypher) {Cypher Query\\Generation};
+            \node[block, left of=cypher, fill=graphcolor!30] (graph) {Knowledge Graph\\(Neo4j)};
+
             \draw[arrow] (data) -- (ner);
             \draw[arrow] (ner) -- (linking);
             \draw[arrow] (linking) -- (relation);
-            \draw[arrow] (relation) -- (graph);
-            \draw[arrow] (graph) -- (cypher);
-            \draw[arrow, bend right=45] (cypher) to (data);
+            \draw[arrow] (relation) -- (cypher);
+            \draw[arrow] (cypher) -- (graph);
         \end{tikzpicture}
     \end{center}
     
@@ -415,8 +402,8 @@
         \begin{column}{0.5\textwidth}
             \textbf{Model Comparison:}
             \begin{itemize}
-                \item \textcolor{ulblue}{Gemma-3-4b-it}: General-purpose
-                \item \textcolor{ulgreen}{MedGemma-3-4b}: Medical domain-specific
+                \item Gemma-3-4b-it: General-purpose
+                \item MedGemma-3-4b: Medical domain-specific
             \end{itemize}
             
             \textbf{Prompt Strategies:}
@@ -439,7 +426,7 @@
     \end{columns}
     
     \vspace{0.5cm}
-    \textbf{Output Validation:} Entity matching, relation validation, deduplication
+    \textbf{Output Validation:} Matches Entities, relation validation, deduplication
 \end{frame}
 
 \begin{frame}{Component 4: Neo4j Knowledge Graph}
@@ -588,7 +575,7 @@
         \toprule
         \textbf{Model} & \textbf{Strategy} & \textbf{F1} & \textbf{Precision/Recall} \\
         \midrule
-        \textcolor{ulblue}{Gemma} & \textcolor{ulblue}{Few-shot} & \textcolor{ulblue}{\textbf{0.082}} & 0.082 / 0.082 \\
+        \textcolor{ulgreen}{Gemma} & \textcolor{ulgreen}{Few-shot} & \textcolor{ulgreen}{\textbf{0.082}} & 0.082 / 0.082 \\
         Gemma & Basic & 0.073 & 0.073 / 0.073 \\
         MedGemma & Few-shot & 0.070 & 0.087 / 0.059 \\
         Gemma & Structured & 0.069 & 0.075 / 0.065 \\
@@ -602,7 +589,7 @@
     \textbf{Surprising Findings:}
     \begin{itemize}
         \setlength{\itemsep}{0.3cm}
-        \item \textcolor{ulblue}{General Gemma outperformed domain-specific MedGemma}
+        \item General Gemma outperformed domain-specific MedGemma
         \item Few-shot prompting most effective across both models
         \item Overall low F1 scores (5-8\%) indicate task difficulty
     \end{itemize}
@@ -645,7 +632,6 @@
             \item \textbf{Low F1 scores (5-8\%)} across all configurations
             \item Model size constraint: 4B parameters vs. state-of-the-art 70B+
             \item Output formatting inconsistencies
-            \item Entity alignment problems
             \item Hallucination and inference issues
         \end{itemize}
     \end{block}
@@ -655,11 +641,9 @@
             \item Conservative recall (20-35\%)
             \item Boundary detection challenges
             \item Context sensitivity issues
-            \item Missing uncommon terms and new expressions
         \end{itemize}
     \end{block}
-    
-    \textbf{Impact:} Limited recall propagates through pipeline, affecting knowledge graph completeness
+
 \end{frame}
 
 \section{Discussion}
@@ -685,9 +669,9 @@
             \textbf{Technical Strengths:}
             \begin{itemize}
                 \item \textcolor{ulgreen}{Modular architecture}
-                \item \textcolor{ulblue}{UMLS integration} for interoperability
-                \item \textcolor{nercolor}{Flexible configuration} options
-                \item \textcolor{graphcolor}{Scalable Neo4j} backend
+                \item \textcolor{nercolor}{UMLS integration} for interoperability
+                \item \textcolor{ulgreen}{Flexible configuration} options
+                \item \textcolor{nercolor}{Scalable Neo4j} backend
             \end{itemize}
             
             \textbf{Foundation for Future Work:}
