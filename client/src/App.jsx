@@ -59,7 +59,7 @@ Diagnosis: Acute ST-elevation myocardial infarction (STEMI) involving the inferi
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Medical Graph Extraction</h1>
+        <h1>BioMedical Graph Extraction</h1>
         <p>Enter Biomedical text to extract entities and relationships</p>
       </header>
 
